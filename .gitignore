@@ -1,0 +1,16 @@
+# dependências
+node_modules/
+
+# segredos - nunca commitar
+.env
+
+# banco antigo (SQLite, não é mais usado)
+easyfood.db
+
+# logs
+npm-debug.log*
+
+# editor / SO
+.vscode/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EasyFood</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0D12;
+    --surface: #10151C;
+    --surface-2: #161D26;
+    --border: #212A34;
+    --border-strong: #2E3944;
+    --text: #E7EBEE;
+    --text-muted: #8B97A3;
+    --accent: #4FE3C1;
+    --accent-ink: #06110E;
+    --accent-dim: rgba(79, 227, 193, 0.12);
+    --star: #F5A623;
+    --danger: #FF6B6B;
+    --danger-dim: rgba(255, 107, 107, 0.12);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 14px;
+    --font-ui: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 44px; /* espaço para a console tray */
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  button, input { font-family: inherit; font-size: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  code {
+    font-family: var(--font-mono);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+  /* ---------- topbar ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(10, 13, 18, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 20;
+  }
+
+  .brand { display: flex; align-items: center; gap: 10px; }
+
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--text-muted);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    flex-shrink: 0;
+  }
+  .status-dot.online {
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  .status-dot.offline {
+    background: var(--danger);
+    box-shadow: 0 0 0 3px var(--danger-dim);
+    animation: none;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 3px var(--accent-dim); }
+    50% { box-shadow: 0 0 0 6px transparent; }
+  }
+
+  .brand-name { font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
+  .brand-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 2px 6px;
+  }
+
+  .ghost-btn {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .identity-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px 6px 6px;
+    transition: border-color 0.2s ease;
+  }
+  .identity-pill:hover { border-color: var(--accent); }
+  .identity-avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent-dim); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0;
+  }
+
+  /* ---------- main ---------- */
+  main { max-width: 1080px; margin: 0 auto; padding: 40px 28px 80px; }
+
+  .section-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .section-header h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; }
+  .section-header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+
+  .primary-btn {
+    background: var(--accent); color: var(--accent-ink);
+    border: none; padding: 10px 20px; border-radius: var(--radius-md);
+    font-weight: 600; white-space: nowrap;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+  }
+  .primary-btn:hover { opacity: 0.88; }
+  .primary-btn:active { transform: scale(0.98); }
+
+  .controls { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .search-input {
+    flex: 1; min-width: 200px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 10px 14px;
+    transition: border-color 0.2s ease;
+  }
+  .search-input::placeholder { color: var(--text-muted); }
+  .search-input:focus { border-color: var(--accent); outline: none; }
+
+  .filter-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 28px; }
+  .filter-pill {
+    flex-shrink: 0; background: transparent; border: 1px solid var(--border);
+    color: var(--text-muted); padding: 8px 14px; border-radius: 999px;
+    font-size: 13px; transition: all 0.2s ease;
+  }
+  .filter-pill:hover { border-color: var(--border-strong); color: var(--text); }
+  .filter-pill.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 20px;
+    transition: border-color 0.2s ease;
+  }
+  .card:hover { border-color: var(--border-strong); }
+  .card-category {
+    display: inline-block; font-size: 12px; color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; margin-bottom: 12px;
+  }
+  .card-name { font-size: 17px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.005em; }
+  .card-rating { display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 14px; }
+  .card-rating svg { fill: var(--star); width: 14px; height: 14px; }
+
+  .state-panel {
+    text-align: center; padding: 64px 24px;
+    border: 1px dashed var(--border); border-radius: var(--radius-md);
+    color: var(--text-muted);
+  }
+  .state-panel h3 { color: var(--text); font-size: 17px; margin-bottom: 8px; font-weight: 600; }
+  .state-panel p { font-size: 14px; margin-bottom: 20px; max-width: 380px; margin-inline: auto; }
+
+  /* ---------- drawer ---------- */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(5, 7, 10, 0.6);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 40;
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+
+  .drawer {
+    position: fixed; top: 0; right: 0; height: 100%;
+    width: 400px; max-width: 92vw;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 41;
+    display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: translateX(0); }
+
+  .drawer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .drawer-close {
+    background: none; border: none; color: var(--text-muted);
+    font-size: 22px; line-height: 1; padding: 4px;
+  }
+  .drawer-close:hover { color: var(--text); }
+  .drawer-body { padding: 24px; overflow-y: auto; flex: 1; }
+
+  .tab-switch {
+    display: flex; gap: 4px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: 4px; margin-bottom: 24px;
+  }
+  .tab-btn {
+    flex: 1; background: none; border: none; color: var(--text-muted);
+    padding: 8px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500; transition: all 0.2s ease;
+  }
+  .tab-btn.active { background: var(--surface-2); color: var(--text); }
+
+  .form-note {
+    background: var(--accent-dim); border: 1px solid var(--accent);
+    color: var(--accent); font-size: 13px; padding: 10px 14px;
+    border-radius: var(--radius-sm); margin-bottom: 20px;
+  }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+  .field input {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 12px;
+    transition: border-color 0.2s ease;
+  }
+  .field input:focus { border-color: var(--accent); outline: none; }
+  .field-error { color: var(--danger); font-size: 12px; margin-top: 6px; display: none; }
+  .field.has-error input { border-color: var(--danger); }
+  .field.has-error .field-error { display: block; }
+
+  .password-field { position: relative; }
+  .password-toggle {
+    position: absolute; right: 10px; top: 32px;
+    background: none; border: none; color: var(--text-muted); font-size: 12px;
+  }
+  .password-toggle:hover { color: var(--accent); }
+
+  .submit-btn {
+    width: 100%; background: var(--accent); color: var(--accent-ink);
+    border: none; padding: 12px; border-radius: var(--radius-md);
+    font-weight: 600; transition: opacity 0.2s ease;
+  }
+  .submit-btn:hover { opacity: 0.88; }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .profile-card {
+    display: flex; align-items: center; gap: 14px; padding: 16px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-md); margin-bottom: 24px;
+  }
+  .profile-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--accent-dim); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 16px; flex-shrink: 0;
+  }
+  .profile-name { font-weight: 600; }
+  .profile-email { color: var(--text-muted); font-size: 13px; }
+
+  .secondary-btn {
+    width: 100%; background: transparent; border: 1px solid var(--border-strong);
+    color: var(--text); padding: 11px; border-radius: var(--radius-md);
+    margin-bottom: 10px; font-size: 14px; transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .secondary-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .danger-btn {
+    width: 100%; background: transparent; border: 1px solid var(--border);
+    color: var(--danger); padding: 11px; border-radius: var(--radius-md);
+    transition: border-color 0.2s ease;
+  }
+  .danger-btn:hover { border-color: var(--danger); }
+
+  /* ---------- toasts ---------- */
+  .toast-stack {
+    position: fixed; bottom: 56px; right: 24px;
+    display: flex; flex-direction: column; gap: 10px;
+    z-index: 60; max-width: 320px;
+  }
+  .toast {
+    background: var(--surface-2); border: 1px solid var(--border-strong);
+    border-left: 3px solid var(--accent); border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 13px;
+    animation: slideIn 0.25s ease;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  .toast.error { border-left-color: var(--danger); }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ---------- console tray ---------- */
+  .console-tray {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface); border-top: 1px solid var(--border);
+    z-index: 30; font-family: var(--font-mono);
+  }
+  .console-toggle {
+    width: 100%; background: none; border: none; color: var(--text-muted);
+    padding: 11px 24px; display: flex; align-items: center; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 12px;
+  }
+  .console-toggle:hover { color: var(--text); }
+  .console-log {
+    max-height: 0; overflow-y: auto;
+    transition: max-height 0.25s ease;
+    border-top: 1px solid transparent;
+  }
+  .console-tray.open .console-log { max-height: 200px; border-top-color: var(--border); }
+  .log-entry {
+    display: flex; gap: 12px; padding: 8px 24px; font-size: 12px;
+    border-bottom: 1px solid var(--border); color: var(--text-muted);
+  }
+  .log-entry .log-time { width: 70px; flex-shrink: 0; }
+  .log-entry .log-method { width: 44px; flex-shrink: 0; color: var(--text); }
+  .log-entry .log-path { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .log-entry .log-status { width: 36px; text-align: right; flex-shrink: 0; font-weight: 600; }
+  .log-status.ok { color: var(--accent); }
+  .log-status.err { color: var(--danger); }
+
+  @media (max-width: 640px) {
+    .topbar { padding: 14px 16px; }
+    main { padding: 24px 16px 60px; }
+    .drawer { width: 100%; border-radius: 0; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="status-dot" id="status-dot" title="Verificando conexão..."></span>
+      <span class="brand-name">EasyFood</span>
+      <span class="brand-tag">API</span>
+    </div>
+    <div id="auth-area"></div>
+  </header>
+
+  <main>
+    <div class="section-header">
+      <div>
+        <h1>Restaurantes</h1>
+        <p id="results-count">carregando...</p>
+      </div>
+      <button class="primary-btn" id="add-btn">Cadastrar restaurante</button>
+    </div>
+
+    <div class="controls">
+      <input type="text" class="search-input" id="search-input" placeholder="Buscar por nome">
+    </div>
+    <div class="filter-pills" id="filter-pills"></div>
+
+    <div id="grid-container"></div>
+  </main>
+
+  <div class="overlay" id="overlay"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-header">
+      <strong id="drawer-title">Conta</strong>
+      <button class="drawer-close" id="drawer-close" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+  </aside>
+
+  <div class="toast-stack" id="toast-stack"></div>
+
+  <div class="console-tray" id="console-tray">
+    <button class="console-toggle" id="console-toggle">
+      <span id="console-label">▲ atividade da api (0)</span>
+      <span>requisições recentes</span>
+    </button>
+    <div class="console-log" id="console-log"></div>
+  </div>
+
+<script>
+  const API_BASE = 'http://localhost:3000';
+
+  // ---------- state ----------
+  let restaurants = [];
+  let authToken = null;
+  let currentUser = null;
+  let selectedCategory = 'Todos';
+  let searchQuery = '';
+  let pendingIntent = null;
+  let apiLog = [];
+  let drawerMode = null;
+  let authTab = 'login';
+
+  // ---------- dom refs ----------
+  const el = (id) => document.getElementById(id);
+  const statusDot = el('status-dot');
+  const authArea = el('auth-area');
+  const gridContainer = el('grid-container');
+  const resultsCount = el('results-count');
+  const searchInput = el('search-input');
+  const filterPills = el('filter-pills');
+  const overlay = el('overlay');
+  const drawer = el('drawer');
+  const drawerTitle = el('drawer-title');
+  const drawerBody = el('drawer-body');
+  const toastStack = el('toast-stack');
+  const consoleTray = el('console-tray');
+  const consoleToggle = el('console-toggle');
+  const consoleLog = el('console-log');
+  const consoleLabel = el('console-label');
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+  }
+
+  // ---------- api wrapper ----------
+  async function api(path, { method = 'GET', body, auth = false } = {}) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (auth && authToken) headers['Authorization'] = 'Bearer ' + authToken;
+
+    const startTime = new Date();
+    let status = 0;
+    let data = null;
+
+    try {
+      const response = await fetch(API_BASE + path, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined
+      });
+      status = response.status;
+      setOnline(true);
+
+      try { data = await response.json(); } catch (_) { data = null; }
+
+      logRequest(method, path, status, startTime);
+
+      if (!response.ok) {
+        const error = new Error((data && data.error) || 'Erro na requisição');
+        error.status = status;
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      if (status === 0) {
+        setOnline(false);
+        logRequest(method, path, 'ERR', startTime);
+      }
+      throw error;
+    }
+  }
+
+  function setOnline(isOnline) {
+    statusDot.classList.toggle('online', isOnline);
+    statusDot.classList.toggle('offline', !isOnline);
+    statusDot.title = isOnline ? 'API conectada' : 'API indisponível';
+  }
+
+  function logRequest(method, path, status, startTime) {
+    const time = startTime.toLocaleTimeString('pt-BR', { hour12: false });
+    apiLog.unshift({ method, path, status, time });
+    apiLog = apiLog.slice(0, 30);
+    renderConsole();
+  }
+
+  function renderConsole() {
+    const arrow = consoleTray.classList.contains('open') ? '▼' : '▲';
+    consoleLabel.textContent = arrow + ' atividade da api (' + apiLog.length + ')';
+    consoleLog.innerHTML = apiLog.map(entry => {
+      const cls = entry.status === 'ERR' || entry.status >= 400 ? 'err' : 'ok';
+      return '<div class="log-entry">' +
+        '<span class="log-time">' + entry.time + '</span>' +
+        '<span class="log-method">' + entry.method + '</span>' +
+        '<span class="log-path">' + escapeHtml(entry.path) + '</span>' +
+        '<span class="log-status ' + cls + '">' + entry.status + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  consoleToggle.addEventListener('click', () => {
+    consoleTray.classList.toggle('open');
+    renderConsole();
+  });
+
+  // ---------- restaurants ----------
+  async function loadRestaurants() {
+    resultsCount.textContent = 'carregando...';
+    try {
+      const data = await api('/restaurants');
+      restaurants = data || [];
+      renderFilters();
+      renderGrid();
+    } catch (error) {
+      resultsCount.textContent = 'indisponível';
+      renderErrorState();
+    }
+  }
+
+  function renderFilters() {
+    const categories = ['Todos', ...new Set(restaurants.map(r => r.category))];
+    filterPills.innerHTML = categories.map(cat =>
+      '<button class="filter-pill ' + (cat === selectedCategory ? 'active' : '') + '" data-cat="' + escapeHtml(cat) + '">' + escapeHtml(cat) + '</button>'
+    ).join('');
+    filterPills.querySelectorAll('.filter-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedCategory = btn.dataset.cat;
+        renderFilters();
+        renderGrid();
+      });
+    });
+  }
+
+  function getFiltered() {
+    return restaurants.filter(r => {
+      const matchCategory = selectedCategory === 'Todos' || r.category === selectedCategory;
+      const matchSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchCategory && matchSearch;
+    });
+  }
+
+  function cardHtml(r) {
+    return '<div class="card">' +
+      '<span class="card-category">' + escapeHtml(r.category) + '</span>' +
+      '<div class="card-name">' + escapeHtml(r.name) + '</div>' +
+      '<div class="card-rating">' +
+        '<svg viewBox="0 0 20 20"><path d="M10 1l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L10 15l-5.6 3 1.4-6.2L1 7.5l6.4-.6L10 1z"/></svg>' +
+        Number(r.rating || 0).toFixed(1) +
+      '</div></div>';
+  }
+
+  function renderGrid() {
+    const filtered = getFiltered();
+    resultsCount.textContent = filtered.length + (filtered.length === 1 ? ' restaurante encontrado' : ' restaurantes encontrados');
+
+    if (restaurants.length === 0) {
+      gridContainer.innerHTML =
+        '<div class="state-panel"><h3>Nenhum restaurante cadastrado ainda</h3>' +
+        '<p>Cadastre o primeiro restaurante da EasyFood para começar.</p>' +
+        '<button class="primary-btn" id="empty-add-btn">Cadastrar restaurante</button></div>';
+      el('empty-add-btn').addEventListener('click', handleAddClick);
+      return;
+    }
+
+    if (filtered.length === 0) {
+      gridContainer.innerHTML =
+        '<div class="state-panel"><h3>Nenhum resultado</h3>' +
+        '<p>Não encontramos restaurantes' + (searchQuery ? ' para "' + escapeHtml(searchQuery) + '"' : '') + ' em ' + escapeHtml(selectedCategory) + '.</p>' +
+        '<button class="primary-btn" id="clear-filters-btn">Limpar busca</button></div>';
+      el('clear-filters-btn').addEventListener('click', clearFilters);
+      return;
+    }
+
+    gridContainer.innerHTML = '<div class="grid">' + filtered.map(cardHtml).join('') + '</div>';
+  }
+
+  function renderErrorState() {
+    gridContainer.innerHTML =
+      '<div class="state-panel"><h3>Não foi possível conectar à API</h3>' +
+      '<p>Verifique se o servidor está rodando (<code>node server.js</code>) na porta 3000.</p>' +
+      '<button class="primary-btn" id="retry-btn">Tentar novamente</button></div>';
+    el('retry-btn').addEventListener('click', loadRestaurants);
+  }
+
+  function clearFilters() {
+    selectedCategory = 'Todos';
+    searchQuery = '';
+    searchInput.value = '';
+    renderFilters();
+    renderGrid();
+  }
+
+  searchInput.addEventListener('input', (e) => {
+    searchQuery = e.target.value;
+    renderGrid();
+  });
+
+  // ---------- auth area (topbar) ----------
+  function renderAuthArea() {
+    if (currentUser) {
+      const initial = currentUser.name.charAt(0).toUpperCase();
+      authArea.innerHTML =
+        '<div class="identity-pill" id="identity-pill">' +
+        '<span class="identity-avatar">' + escapeHtml(initial) + '</span>' +
+        '<span>' + escapeHtml(currentUser.name) + '</span></div>';
+      el('identity-pill').addEventListener('click', () => openDrawer('profile'));
+    } else {
+      authArea.innerHTML = '<button class="ghost-btn" id="login-trigger">Entrar</button>';
+      el('login-trigger').addEventListener('click', () => openDrawer('auth', 'login'));
+    }
+  }
+
+  // ---------- drawer ----------
+  function openDrawer(mode, tab) {
+    drawerMode = mode;
+    if (tab) authTab = tab;
+    overlay.classList.add('open');
+    drawer.classList.add('open');
+    renderDrawer();
+  }
+
+  function closeDrawer() {
+    overlay.classList.remove('open');
+    drawer.classList.remove('open');
+  }
+
+  overlay.addEventListener('click', closeDrawer);
+  el('drawer-close').addEventListener('click', closeDrawer);
+
+  function renderDrawer() {
+    if (drawerMode === 'auth') {
+      drawerTitle.textContent = 'Conta';
+      drawerBody.innerHTML = authTemplate();
+      bindAuthForms();
+    } else if (drawerMode === 'add') {
+      drawerTitle.textContent = 'Cadastrar restaurante';
+      drawerBody.innerHTML = addRestaurantTemplate();
+      bindAddForm();
+    } else if (drawerMode === 'profile') {
+      drawerTitle.textContent = 'Minha conta';
+      drawerBody.innerHTML = profileTemplate();
+      bindProfileActions();
+    }
+  }
+
+  function authTemplate() {
+    return (pendingIntent === 'add' ? '<div class="form-note">Faça login para cadastrar um restaurante.</div>' : '') +
+      '<div class="tab-switch">' +
+        '<button class="tab-btn ' + (authTab === 'login' ? 'active' : '') + '" data-tab="login">Entrar</button>' +
+        '<button class="tab-btn ' + (authTab === 'register' ? 'active' : '') + '" data-tab="register">Criar conta</button>' +
+      '</div>' +
+      (authTab === 'login' ? loginFormHtml() : registerFormHtml());
+  }
+
+  function loginFormHtml() {
+    return '<form id="login-form" novalidate>' +
+      '<div class="field" id="field-login-email"><label for="login-email">E-mail</label>' +
+      '<input type="email" id="login-email" autocomplete="email"><div class="field-error">Informe um e-mail válido.</div></div>' +
+      '<div class="field password-field" id="field-login-password"><label for="login-password">Senha</label>' +
+      '<input type="password" id="login-password" autocomplete="current-password">' +
+      '<button type="button" class="password-toggle" data-target="login-password">mostrar</button>' +
+      '<div class="field-error">Informe sua senha.</div></div>' +
+      '<button type="submit" class="submit-btn" id="login-submit">Entrar</button></form>';
+  }
+
+  function registerFormHtml() {
+    return '<form id="register-form" novalidate>' +
+      '<div class="field" id="field-register-name"><label for="register-name">Nome</label>' +
+      '<input type="text" id="register-name" autocomplete="name"><div class="field-error">Informe seu nome.</div></div>' +
+      '<div class="field" id="field-register-email"><label for="register-email">E-mail</label>' +
+      '<input type="email" id="register-email" autocomplete="email"><div class="field-error">Informe um e-mail válido.</div></div>' +
+      '<div class="field password-field" id="field-register-password"><label for="register-password">Senha</label>' +
+      '<input type="password" id="register-password" autocomplete="new-password">' +
+      '<button type="button" class="password-toggle" data-target="register-password">mostrar</button>' +
+      '<div class="field-error">Mínimo de 6 caracteres.</div></div>' +
+      '<button type="submit" class="submit-btn" id="register-submit">Criar conta</button></form>';
+  }
+
+  function addRestaurantTemplate() {
+    return '<form id="add-form" novalidate>' +
+      '<div class="field" id="field-add-name"><label for="add-name">Nome do restaurante</label>' +
+      '<input type="text" id="add-name"><div class="field-error">Informe o nome.</div></div>' +
+      '<div class="field" id="field-add-category"><label for="add-category">Categoria</label>' +
+      '<input type="text" id="add-category" placeholder="Ex: Italiana, Japonesa..."><div class="field-error">Informe a categoria.</div></div>' +
+      '<div class="field"><label for="add-rating">Nota (0 a 5)</label>' +
+      '<input type="number" id="add-rating" min="0" max="5" step="0.1" value="4.5"></div>' +
+      '<button type="submit" class="submit-btn" id="add-submit">Cadastrar</button></form>';
+  }
+
+  function profileTemplate() {
+    const initial = currentUser.name.charAt(0).toUpperCase();
+    return '<div class="profile-card"><span class="profile-avatar">' + escapeHtml(initial) + '</span>' +
+      '<div><div class="profile-name">' + escapeHtml(currentUser.name) + '</div>' +
+      '<div class="profile-email">' + escapeHtml(currentUser.email) + '</div></div></div>' +
+      '<button class="secondary-btn" id="add-from-profile">Cadastrar restaurante</button>' +
+      '<button class="secondary-btn" id="test-me">Verificar sessão (GET /auth/me)</button>' +
+      '<button class="danger-btn" id="logout-btn">Sair</button>';
+  }
+
+  function bindAuthForms() {
+    drawerBody.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => { authTab = btn.dataset.tab; renderDrawer(); });
+    });
+    drawerBody.querySelectorAll('.password-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.target);
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        btn.textContent = isPassword ? 'ocultar' : 'mostrar';
+      });
+    });
+    const loginForm = el('login-form');
+    if (loginForm) loginForm.addEventListener('submit', handleLogin);
+    const registerForm = el('register-form');
+    if (registerForm) registerForm.addEventListener('submit', handleRegister);
+  }
+
+  function bindAddForm() {
+    el('add-form').addEventListener('submit', handleAddRestaurant);
+  }
+
+  function bindProfileActions() {
+    el('add-from-profile').addEventListener('click', () => openDrawer('add'));
+    el('test-me').addEventListener('click', handleTestMe);
+    el('logout-btn').addEventListener('click', handleLogout);
+  }
+
+  function setFieldError(fieldId, hasError) {
+    const field = document.getElementById(fieldId);
+    if (field) field.classList.toggle('has-error', hasError);
+  }
+
+  // ---------- handlers ----------
+  async function handleLogin(e) {
+    e.preventDefault();
+    const email = el('login-email').value.trim();
+    const password = el('login-password').value;
+
+    setFieldError('field-login-email', !email);
+    setFieldError('field-login-password', !password);
+    if (!email || !password) return;
+
+    const btn = el('login-submit');
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+
+    try {
+      const data = await api('/auth/login', { method: 'POST', body: { email, password } });
+      authToken = data.token;
+      currentUser = data.user;
+      renderAuthArea();
+      showToast('Bem-vindo(a), ' + currentUser.name + '.', 'success');
+
+      if (pendingIntent === 'add') {
+        pendingIntent = null;
+        openDrawer('add');
+      } else {
+        closeDrawer();
+      }
+    } catch (error) {
+      showToast(error.message || 'Credenciais inválidas.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+    }
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault();
+    const name = el('register-name').value.trim();
+    const email = el('register-email').value.trim();
+    const password = el('register-password').value;
+
+    setFieldError('field-register-name', !name);
+    setFieldError('field-register-email', !email);
+    setFieldError('field-register-password', password.length < 6);
+    if (!name || !email || password.length < 6) return;
+
+    const btn = el('register-submit');
+    btn.disabled = true;
+    btn.textContent = 'Criando...';
+
+    try {
+      await api('/auth/register', { method: 'POST', body: { name, email, password } });
+      showToast('Conta criada. Agora faça login.', 'success');
+      authTab = 'login';
+      renderDrawer();
+      el('login-email').value = email;
+    } catch (error) {
+      showToast(error.message || 'Erro ao criar conta.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Criar conta';
+    }
+  }
+
+  async function handleAddRestaurant(e) {
+    e.preventDefault();
+    const name = el('add-name').value.trim();
+    const category = el('add-category').value.trim();
+    const rating = parseFloat(el('add-rating').value) || 0;
+
+    setFieldError('field-add-name', !name);
+    setFieldError('field-add-category', !category);
+    if (!name || !category) return;
+
+    const btn = el('add-submit');
+    btn.disabled = true;
+    btn.textContent = 'Cadastrando...';
+
+    try {
+      await api('/restaurants', { method: 'POST', auth: true, body: { name, category, rating } });
+      showToast('"' + name + '" cadastrado com sucesso.', 'success');
+      closeDrawer();
+      loadRestaurants();
+    } catch (error) {
+      if (error.status === 401) {
+        showToast('Sessão expirada. Faça login novamente.', 'error');
+        authToken = null;
+        currentUser = null;
+        renderAuthArea();
+        openDrawer('auth', 'login');
+      } else {
+        showToast(error.message || 'Erro ao cadastrar.', 'error');
+      }
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Cadastrar';
+    }
+  }
+
+  async function handleTestMe() {
+    try {
+      const data = await api('/auth/me', { auth: true });
+      showToast('Sessão válida: ' + data.user.email, 'success');
+    } catch (error) {
+      showToast('Sessão inválida ou expirada.', 'error');
+    }
+  }
+
+  function handleLogout() {
+    authToken = null;
+    currentUser = null;
+    renderAuthArea();
+    closeDrawer();
+    showToast('Você saiu da conta.', 'success');
+  }
+
+  function handleAddClick() {
+    if (!currentUser) {
+      pendingIntent = 'add';
+      openDrawer('auth', 'login');
+    } else {
+      openDrawer('add');
+    }
+  }
+
+  el('add-btn').addEventListener('click', handleAddClick);
+
+  function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = 'toast' + (type === 'error' ? ' error' : '');
+    toast.textContent = message;
+    toastStack.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+  }
+
+  // ---------- init ----------
+  renderAuthArea();
+  loadRestaurants();
+</script>
+</body>
+</html>
