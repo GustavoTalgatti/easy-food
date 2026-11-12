@@ -13,7 +13,28 @@ model Restaurant {
   category String
   rating   Float  @default(0)
 
+  // Relação 1:N. Um restaurante possui vários pratos.
+  // Este campo é virtual: não existe coluna na tabela "restaurants",
+  // ele só permite ao Prisma navegar do restaurante até o seu cardápio.
+  dishes   Dish[]
+
   @@map("restaurants")
+}
+
+model Dish {
+  id           Int     @id @default(autoincrement())
+  name         String
+  description  String
+  price        Decimal @db.Decimal(10, 2)
+  imageUrl     String?
+
+  // Cada prato pertence a exatamente um restaurante.
+  // restaurantId é a chave estrangeira (coluna real na tabela "dishes");
+  // o campo "restaurant" é a relação que o Prisma usa para navegar de volta.
+  restaurantId Int
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@map("dishes")
 }
 
 model User {
@@ -21,6 +42,7 @@ model User {
   name      String
   email     String   @unique
   password  String
+  imageUrl  String?
   createdAt DateTime @default(now())
 
   @@map("users")

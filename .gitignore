@@ -7,6 +7,15 @@ node_modules/
 # banco antigo (SQLite, não é mais usado)
 easyfood.db
 
+# arquivos compactados temporários
+*.zip
+
+# imagens enviadas pelos usuários (mantém só a estrutura das pastas)
+uploads/dishes/*
+!uploads/dishes/.gitkeep
+uploads/users/*
+!uploads/users/.gitkeep
+
 # logs
 npm-debug.log*
 

@@ -1,7 +1,7 @@
 const authService = require("./auth.service");
 
 async function register(req, res) {
-  const { name, email, password } = req.body;
+  const { name, email, password } = req.body || {};
 
   if (!name || !email || !password) {
     return res.status(400).json({
@@ -29,7 +29,7 @@ async function register(req, res) {
 }
 
 async function login(req, res) {
-  const { email, password } = req.body;
+  const { email, password } = req.body || {};
 
   if (!email || !password) {
     return res.status(400).json({
@@ -57,7 +57,50 @@ async function login(req, res) {
   }
 }
 
+async function me(req, res) {
+  try {
+    const user = await authService.getProfile(req.user.id);
+
+    return res.json({
+      message: "Você está autenticado!",
+      user
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      error: error.statusCode
+        ? error.message
+        : "Erro ao consultar perfil do usuário"
+    });
+  }
+}
+
+async function uploadImage(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        error: "Nenhuma imagem enviada"
+      });
+    }
+
+    // O ID vem exclusivamente do token JWT validado pelo middleware de autenticação
+    const user = await authService.uploadProfileImage(
+      req.user.id,
+      req.file.buffer
+    );
+
+    return res.json(user);
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      error: error.statusCode
+        ? error.message
+        : "Erro ao processar imagem de perfil"
+    });
+  }
+}
+
 module.exports = {
   register,
-  login
+  login,
+  me,
+  uploadImage
 };

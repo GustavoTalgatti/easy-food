@@ -1,455 +1,672 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EasyFood</title>
+<title>EasyFood — Delivery & Gastronomia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0A0D12;
-    --surface: #10151C;
-    --surface-2: #161D26;
-    --border: #212A34;
-    --border-strong: #2E3944;
-    --text: #E7EBEE;
-    --text-muted: #8B97A3;
-    --accent: #4FE3C1;
-    --accent-ink: #06110E;
-    --accent-dim: rgba(79, 227, 193, 0.12);
-    --star: #F5A623;
-    --danger: #FF6B6B;
-    --danger-dim: rgba(255, 107, 107, 0.12);
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 14px;
-    --font-ui: 'Space Grotesk', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+    --bg: #08080A;
+    --bg-elevated: #111115;
+    --surface: #16161C;
+    --surface-hover: #1E1E26;
+    --border: #272732;
+    --border-gold: rgba(245, 183, 49, 0.35);
+    --text: #F5F5F7;
+    --text-muted: #9A9AA6;
+    --red: #E51D2A;
+    --red-hover: #FF2E3B;
+    --red-dim: rgba(229, 29, 42, 0.14);
+    --gold: #F5B731;
+    --gold-dim: rgba(245, 183, 49, 0.14);
+    --success: #22C55E;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --font-ui: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.65);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-ui);
-    font-size: 15px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    padding-bottom: 44px; /* espaço para a console tray */
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-
-  button, input { font-family: inherit; font-size: inherit; color: inherit; }
-  button { cursor: pointer; }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-  code {
-    font-family: var(--font-mono);
-    background: var(--bg);
-    border: 1px solid var(--border);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.9em;
-  }
+  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-ui); -webkit-font-smoothing: antialiased; }
+  body { padding-bottom: 60px; overflow-x: hidden; }
+  button, input, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+  button { cursor: pointer; border: none; background: none; }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
   ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-  /* ---------- topbar ---------- */
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 28px;
+  /* ---------- TOPBAR ---------- */
+  .navbar {
+    position: sticky; top: 0; z-index: 30;
+    background: rgba(8, 8, 10, 0.88);
+    backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    background: rgba(10, 13, 18, 0.85);
-    backdrop-filter: blur(8px);
-    z-index: 20;
   }
-
-  .brand { display: flex; align-items: center; gap: 10px; }
-
-  .status-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--text-muted);
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-    flex-shrink: 0;
+  .navbar-inner {
+    max-width: 1240px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
   }
-  .status-dot.online {
-    background: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-dim);
-    animation: pulse 2.4s ease-in-out infinite;
-  }
-  .status-dot.offline {
-    background: var(--danger);
-    box-shadow: 0 0 0 3px var(--danger-dim);
-    animation: none;
-  }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 3px var(--accent-dim); }
-    50% { box-shadow: 0 0 0 6px transparent; }
-  }
-
-  .brand-name { font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
-  .brand-tag {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 2px 6px;
-  }
-
-  .ghost-btn {
-    background: transparent;
-    border: 1px solid var(--border-strong);
-    color: var(--text);
-    padding: 8px 16px;
-    border-radius: var(--radius-md);
-    transition: border-color 0.2s ease, color 0.2s ease;
-  }
-  .ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-  .identity-pill {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 6px 14px 6px 6px;
-    transition: border-color 0.2s ease;
-  }
-  .identity-pill:hover { border-color: var(--accent); }
-  .identity-avatar {
-    width: 24px; height: 24px; border-radius: 50%;
-    background: var(--accent-dim); color: var(--accent);
+  .brand { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+  .brand-logo {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--red), #990F17);
+    border: 1px solid var(--gold);
     display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 600; flex-shrink: 0;
+    font-weight: 800; font-size: 18px; color: var(--gold);
+    box-shadow: 0 4px 16px rgba(229, 29, 42, 0.35);
+  }
+  .brand-text { display: flex; flex-direction: column; }
+  .brand-title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+  .brand-title span { color: var(--gold); }
+  .brand-subtitle { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); display: inline-block; }
+  .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+  .status-dot.offline { background: var(--red); box-shadow: 0 0 8px var(--red); }
+
+  .nav-search {
+    flex: 1; max-width: 420px; min-width: 220px; position: relative;
+  }
+  .nav-search input {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 999px; padding: 10px 16px 10px 40px; font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .nav-search input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); outline: none; }
+  .nav-search-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted); pointer-events: none; width: 16px; height: 16px;
   }
 
-  /* ---------- main ---------- */
-  main { max-width: 1080px; margin: 0 auto; padding: 40px 28px 80px; }
+  .nav-actions { display: flex; align-items: center; gap: 10px; }
 
-  .section-header {
-    display: flex; align-items: baseline; justify-content: space-between;
-    gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+  .btn-red {
+    background: linear-gradient(135deg, var(--red), #B8111C);
+    color: #fff; font-weight: 700; font-size: 13px;
+    padding: 10px 18px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 4px 14px rgba(229, 29, 42, 0.35);
+    transition: transform 0.15s, background 0.2s;
+    display: inline-flex; align-items: center; gap: 8px;
   }
-  .section-header h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; }
-  .section-header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+  .btn-red:hover { background: linear-gradient(135deg, var(--red-hover), var(--red)); transform: translateY(-1px); }
 
-  .primary-btn {
-    background: var(--accent); color: var(--accent-ink);
-    border: none; padding: 10px 20px; border-radius: var(--radius-md);
-    font-weight: 600; white-space: nowrap;
-    transition: opacity 0.2s ease, transform 0.15s ease;
+  .btn-gold-outline {
+    background: var(--gold-dim); color: var(--gold);
+    border: 1px solid var(--border-gold); font-weight: 600; font-size: 13px;
+    padding: 9px 16px; border-radius: 999px;
+    transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
   }
-  .primary-btn:hover { opacity: 0.88; }
-  .primary-btn:active { transform: scale(0.98); }
+  .btn-gold-outline:hover { background: var(--gold); color: #08080A; }
 
-  .controls { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-  .search-input {
-    flex: 1; min-width: 200px;
+  .btn-ghost {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border); font-weight: 600; font-size: 13px;
+    padding: 9px 16px; border-radius: 999px;
+    transition: border-color 0.2s, color 0.2s;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+  .user-pill {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border-gold);
+    border-radius: 999px; padding: 5px 14px 5px 6px;
+    cursor: pointer; transition: background 0.2s, transform 0.15s;
+  }
+  .user-pill:hover { background: var(--surface-hover); transform: translateY(-1px); }
+  .user-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), #C88A14);
+    color: #08080A; font-weight: 800; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; object-fit: cover; border: 1.5px solid var(--gold); flex-shrink: 0;
+  }
+  .user-pill-info { display: flex; flex-direction: column; text-align: left; line-height: 1.15; }
+  .user-pill-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .user-pill-action { font-size: 10px; color: var(--gold); font-weight: 600; }
+
+  .cart-trigger {
+    position: relative; background: var(--surface); border: 1px solid var(--border);
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s;
+  }
+  .cart-trigger:hover { border-color: var(--gold); color: var(--gold); }
+  .cart-badge {
+    position: absolute; top: -4px; right: -4px;
+    background: var(--red); color: #fff; font-size: 11px; font-weight: 800;
+    min-width: 18px; height: 18px; border-radius: 999px; padding: 0 5px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--bg);
+  }
+
+  /* ---------- HERO BANNER ---------- */
+  .hero-wrap { max-width: 1240px; margin: 24px auto 0; padding: 0 24px; }
+  .hero {
+    position: relative; overflow: hidden;
+    background: radial-gradient(circle at 85% 20%, rgba(245, 183, 49, 0.16), transparent 45%),
+                linear-gradient(125deg, #160709 0%, #0E0E12 55%, #1A1206 100%);
+    border: 1px solid var(--border-gold);
+    border-radius: var(--radius-lg);
+    padding: 36px 40px;
+    display: flex; align-items: center; justify-content: space-between; gap: 28px; flex-wrap: wrap;
+    box-shadow: var(--shadow-lg);
+  }
+  .hero-content { max-width: 620px; z-index: 2; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--gold-dim); color: var(--gold);
+    border: 1px solid var(--border-gold);
+    padding: 5px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: clamp(26px, 3.5vw, 38px); font-weight: 800; line-height: 1.15; letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--gold); }
+  .hero p { color: var(--text-muted); font-size: 15px; line-height: 1.6; margin-bottom: 22px; }
+  .hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .hero-stats {
+    display: flex; gap: 16px; flex-wrap: wrap; z-index: 2;
+  }
+  .stat-box {
+    background: rgba(17, 17, 21, 0.85); border: 1px solid var(--border);
+    border-top: 2px solid var(--gold);
+    padding: 16px 20px; border-radius: var(--radius-md); min-width: 145px;
+  }
+  .stat-val { font-size: 24px; font-weight: 800; color: var(--gold); }
+  .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ---------- MAIN CONTAINER ---------- */
+  main { max-width: 1240px; margin: 0 auto; padding: 28px 24px 80px; }
+
+  .toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .toolbar-title h2 { font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+  .toolbar-title p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .category-bar {
+    display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 24px;
+  }
+  .cat-pill {
+    flex-shrink: 0; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-muted); padding: 9px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; transition: all 0.2s;
+  }
+  .cat-pill:hover { border-color: var(--gold); color: var(--text); }
+  .cat-pill.active {
+    background: linear-gradient(135deg, var(--red), #A51019);
+    color: #fff; border-color: var(--gold);
+    box-shadow: 0 4px 12px rgba(229, 29, 42, 0.3);
+  }
+
+  /* ---------- RESTAURANT GRID ---------- */
+  .restaurant-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px;
+  }
+  .rest-card {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-md); padding: 10px 14px;
-    transition: border-color 0.2s ease;
+    border-radius: var(--radius-md); overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    display: flex; flex-direction: column;
   }
-  .search-input::placeholder { color: var(--text-muted); }
-  .search-input:focus { border-color: var(--accent); outline: none; }
-
-  .filter-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 28px; }
-  .filter-pill {
-    flex-shrink: 0; background: transparent; border: 1px solid var(--border);
-    color: var(--text-muted); padding: 8px 14px; border-radius: 999px;
-    font-size: 13px; transition: all 0.2s ease;
+  .rest-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-gold);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
   }
-  .filter-pill:hover { border-color: var(--border-strong); color: var(--text); }
-  .filter-pill.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .rest-banner {
+    height: 110px; position: relative;
+    background: linear-gradient(135deg, #2A080C 0%, #18130A 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px; display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .rest-cat-badge {
+    background: rgba(8, 8, 10, 0.78); backdrop-filter: blur(6px);
+    border: 1px solid var(--border-gold); color: var(--gold);
+    font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .rest-rating-badge {
+    background: rgba(8, 8, 10, 0.85); border: 1px solid var(--border);
+    color: var(--gold); font-weight: 800; font-size: 13px;
+    padding: 4px 10px; border-radius: 999px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .rest-icon-circle {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: var(--bg-elevated); border: 2px solid var(--gold);
+    color: var(--gold); font-weight: 800; font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    position: absolute; bottom: -22px; left: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+  }
+  .rest-body { padding: 30px 20px 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+  .rest-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; color: var(--text); }
+  .rest-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; display: flex; gap: 12px; }
+  .rest-actions { display: flex; gap: 8px; }
+  .rest-btn-primary {
+    flex: 1; background: var(--red-dim); color: #FF6B74;
+    border: 1px solid rgba(229, 29, 42, 0.4);
+    padding: 10px 12px; border-radius: var(--radius-sm);
+    font-weight: 700; font-size: 13px; transition: all 0.2s;
+    text-align: center;
+  }
+  .rest-card:hover .rest-btn-primary { background: var(--red); color: #fff; border-color: var(--red); }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
-  .card {
+  /* ---------- RESTAURANT MENU VIEW (FULL EXPERIENCE) ---------- */
+  .menu-view { display: none; }
+  .menu-view.active { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .menu-hero {
+    background: linear-gradient(135deg, #1E080B 0%, #121217 65%, #1F1708 100%);
+    border: 1px solid var(--border-gold);
+    border-radius: var(--radius-lg); padding: 28px 32px; margin-bottom: 28px;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  }
+  .menu-hero-left { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .menu-hero-avatar {
+    width: 68px; height: 68px; border-radius: 18px;
+    background: linear-gradient(135deg, var(--red), #7A0B12);
+    border: 2px solid var(--gold); color: var(--gold);
+    font-size: 28px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .menu-hero-info h2 { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+  .menu-hero-tags { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); }
+  .menu-hero-tags .gold-tag { color: var(--gold); font-weight: 700; }
+
+  .dishes-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;
+  }
+  .dish-card {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 20px;
-    transition: border-color 0.2s ease;
+    border-radius: var(--radius-md); overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+    transition: border-color 0.2s, transform 0.2s;
   }
-  .card:hover { border-color: var(--border-strong); }
-  .card-category {
-    display: inline-block; font-size: 12px; color: var(--text-muted);
-    border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; margin-bottom: 12px;
-  }
-  .card-name { font-size: 17px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.005em; }
-  .card-rating { display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 14px; }
-  .card-rating svg { fill: var(--star); width: 14px; height: 14px; }
+  .dish-card:hover { border-color: var(--border-gold); transform: translateY(-2px); }
 
-  .state-panel {
-    text-align: center; padding: 64px 24px;
-    border: 1px dashed var(--border); border-radius: var(--radius-md);
-    color: var(--text-muted);
+  .dish-media {
+    position: relative; height: 195px; background: #0D0D11;
+    border-bottom: 1px solid var(--border); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
   }
-  .state-panel h3 { color: var(--text); font-size: 17px; margin-bottom: 8px; font-weight: 600; }
-  .state-panel p { font-size: 14px; margin-bottom: 20px; max-width: 380px; margin-inline: auto; }
+  .dish-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .dish-placeholder {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 12px; gap: 8px; padding: 20px; text-align: center;
+  }
+  .dish-price-pill {
+    position: absolute; bottom: 12px; right: 12px;
+    background: rgba(8, 8, 10, 0.9); backdrop-filter: blur(8px);
+    border: 1px solid var(--gold); color: var(--gold);
+    font-family: var(--font-mono); font-weight: 700; font-size: 14px;
+    padding: 5px 12px; border-radius: 999px;
+  }
+  .dish-photo-btn {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(8, 8, 10, 0.85); backdrop-filter: blur(6px);
+    border: 1px solid var(--border-gold); color: var(--gold);
+    font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 999px;
+    cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .dish-photo-btn:hover { background: var(--gold); color: #08080A; }
 
-  /* ---------- drawer ---------- */
+  .dish-content { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+  .dish-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .dish-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px; }
+
+  .dish-footer {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding-top: 12px; border-top: 1px solid var(--border);
+  }
+  .btn-add-cart {
+    flex: 1; background: linear-gradient(135deg, var(--red), #B8111C);
+    color: #fff; font-weight: 700; font-size: 13px;
+    padding: 9px 14px; border-radius: var(--radius-sm);
+    transition: opacity 0.2s;
+  }
+  .btn-add-cart:hover { opacity: 0.92; }
+
+  /* ---------- EMPTY / ERROR STATES ---------- */
+  .state-box {
+    text-align: center; padding: 56px 24px;
+    background: var(--surface); border: 1px dashed var(--border-gold);
+    border-radius: var(--radius-md); color: var(--text-muted);
+  }
+  .state-box h3 { color: var(--text); font-size: 18px; margin-bottom: 8px; }
+  .state-box p { font-size: 14px; max-width: 420px; margin: 0 auto 20px; }
+
+  /* ---------- DRAWER / MODALS ---------- */
   .overlay {
-    position: fixed; inset: 0;
-    background: rgba(5, 7, 10, 0.6);
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.25s ease;
-    z-index: 40;
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(4px);
+    opacity: 0; pointer-events: none; transition: opacity 0.25s; z-index: 50;
   }
   .overlay.open { opacity: 1; pointer-events: auto; }
 
   .drawer {
-    position: fixed; top: 0; right: 0; height: 100%;
-    width: 400px; max-width: 92vw;
-    background: var(--surface);
-    border-left: 1px solid var(--border);
-    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
-    transform: translateX(100%);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 41;
-    display: flex; flex-direction: column;
+    position: fixed; top: 0; right: 0; height: 100%; width: 440px; max-width: 94vw;
+    background: var(--bg-elevated); border-left: 1px solid var(--border-gold);
+    transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 51; display: flex; flex-direction: column;
+    box-shadow: var(--shadow-lg);
   }
   .drawer.open { transform: translateX(0); }
-
   .drawer-header {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
     display: flex; align-items: center; justify-content: space-between;
-    padding: 20px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    background: var(--surface);
   }
-  .drawer-close {
-    background: none; border: none; color: var(--text-muted);
-    font-size: 22px; line-height: 1; padding: 4px;
-  }
+  .drawer-header strong { font-size: 17px; font-weight: 800; color: var(--gold); }
+  .drawer-close { font-size: 24px; color: var(--text-muted); line-height: 1; padding: 4px; }
   .drawer-close:hover { color: var(--text); }
   .drawer-body { padding: 24px; overflow-y: auto; flex: 1; }
 
-  .tab-switch {
-    display: flex; gap: 4px; background: var(--bg);
-    border: 1px solid var(--border); border-radius: var(--radius-md);
-    padding: 4px; margin-bottom: 24px;
+  /* ---------- FORMS & UPLOAD DROPZONE ---------- */
+  .tab-bar {
+    display: flex; gap: 6px; background: var(--bg); padding: 5px;
+    border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 20px;
   }
-  .tab-btn {
-    flex: 1; background: none; border: none; color: var(--text-muted);
-    padding: 8px; border-radius: var(--radius-sm);
-    font-size: 13px; font-weight: 500; transition: all 0.2s ease;
+  .tab-item {
+    flex: 1; padding: 9px; border-radius: 6px; font-size: 13px; font-weight: 700;
+    color: var(--text-muted); transition: all 0.2s;
   }
-  .tab-btn.active { background: var(--surface-2); color: var(--text); }
-
-  .form-note {
-    background: var(--accent-dim); border: 1px solid var(--accent);
-    color: var(--accent); font-size: 13px; padding: 10px 14px;
-    border-radius: var(--radius-sm); margin-bottom: 20px;
-  }
+  .tab-item.active { background: var(--red); color: #fff; }
 
   .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
-  .field input {
+  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .field input, .field textarea {
     width: 100%; background: var(--bg); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 10px 12px;
-    transition: border-color 0.2s ease;
+    border-radius: var(--radius-sm); padding: 11px 14px; font-size: 14px;
+    transition: border-color 0.2s;
   }
-  .field input:focus { border-color: var(--accent); outline: none; }
-  .field-error { color: var(--danger); font-size: 12px; margin-top: 6px; display: none; }
-  .field.has-error input { border-color: var(--danger); }
+  .field input:focus, .field textarea:focus { border-color: var(--gold); outline: none; }
+  .field-error { color: #FF6B74; font-size: 12px; margin-top: 5px; display: none; }
+  .field.has-error input { border-color: var(--red); }
   .field.has-error .field-error { display: block; }
 
-  .password-field { position: relative; }
-  .password-toggle {
-    position: absolute; right: 10px; top: 32px;
-    background: none; border: none; color: var(--text-muted); font-size: 12px;
+  .upload-card {
+    background: var(--surface); border: 1.5px dashed var(--border-gold);
+    border-radius: var(--radius-md); padding: 18px; text-align: center;
+    margin-bottom: 18px; transition: border-color 0.2s, background 0.2s;
   }
-  .password-toggle:hover { color: var(--accent); }
-
-  .submit-btn {
-    width: 100%; background: var(--accent); color: var(--accent-ink);
-    border: none; padding: 12px; border-radius: var(--radius-md);
-    font-weight: 600; transition: opacity 0.2s ease;
-  }
-  .submit-btn:hover { opacity: 0.88; }
-  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .profile-card {
-    display: flex; align-items: center; gap: 14px; padding: 16px;
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: var(--radius-md); margin-bottom: 24px;
-  }
-  .profile-avatar {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: var(--accent-dim); color: var(--accent);
+  .upload-card:hover { border-color: var(--gold); background: var(--surface-hover); }
+  .upload-preview {
+    width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 12px;
+    background: var(--bg); border: 2px solid var(--gold);
     display: flex; align-items: center; justify-content: center;
-    font-weight: 600; font-size: 16px; flex-shrink: 0;
+    overflow: hidden; object-fit: cover; font-size: 28px; font-weight: 800; color: var(--gold);
   }
-  .profile-name { font-weight: 600; }
-  .profile-email { color: var(--text-muted); font-size: 13px; }
+  .upload-preview.rect {
+    width: 100%; height: 150px; border-radius: var(--radius-sm);
+  }
+  .upload-input-label {
+    display: inline-block; background: var(--gold-dim); color: var(--gold);
+    border: 1px solid var(--border-gold); padding: 8px 16px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .upload-input-label:hover { background: var(--gold); color: #08080A; }
+  .upload-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
 
-  .secondary-btn {
-    width: 100%; background: transparent; border: 1px solid var(--border-strong);
-    color: var(--text); padding: 11px; border-radius: var(--radius-md);
-    margin-bottom: 10px; font-size: 14px; transition: border-color 0.2s ease, color 0.2s ease;
+  .btn-submit {
+    width: 100%; background: linear-gradient(135deg, var(--red), #B8111C);
+    color: #fff; font-weight: 800; font-size: 14px;
+    padding: 13px; border-radius: var(--radius-sm);
+    border: 1px solid rgba(245, 183, 49, 0.35);
+    box-shadow: 0 6px 18px rgba(229, 29, 42, 0.35);
+    transition: opacity 0.2s;
   }
-  .secondary-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .danger-btn {
-    width: 100%; background: transparent; border: 1px solid var(--border);
-    color: var(--danger); padding: 11px; border-radius: var(--radius-md);
-    transition: border-color 0.2s ease;
-  }
-  .danger-btn:hover { border-color: var(--danger); }
+  .btn-submit:hover { opacity: 0.92; }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* ---------- toasts ---------- */
+  .btn-gold-full {
+    width: 100%; background: linear-gradient(135deg, var(--gold), #D4951A);
+    color: #08080A; font-weight: 800; font-size: 14px;
+    padding: 12px; border-radius: var(--radius-sm);
+    margin-top: 8px; transition: opacity 0.2s;
+  }
+  .btn-gold-full:hover { opacity: 0.92; }
+  .btn-gold-full:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ---------- CART ITEMS ---------- */
+  .cart-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); margin-bottom: 10px;
+  }
+  .cart-item-title { font-weight: 700; font-size: 14px; }
+  .cart-item-sub { font-size: 12px; color: var(--gold); font-family: var(--font-mono); }
+  .cart-qty { display: flex; align-items: center; gap: 8px; }
+  .qty-btn {
+    width: 26px; height: 26px; border-radius: 6px; background: var(--bg);
+    border: 1px solid var(--border); color: var(--text); font-weight: 700;
+  }
+  .qty-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ---------- TOASTS ---------- */
   .toast-stack {
-    position: fixed; bottom: 56px; right: 24px;
-    display: flex; flex-direction: column; gap: 10px;
-    z-index: 60; max-width: 320px;
+    position: fixed; bottom: 52px; right: 24px; z-index: 80;
+    display: flex; flex-direction: column; gap: 10px; max-width: 340px;
   }
   .toast {
-    background: var(--surface-2); border: 1px solid var(--border-strong);
-    border-left: 3px solid var(--accent); border-radius: var(--radius-sm);
-    padding: 12px 16px; font-size: 13px;
-    animation: slideIn 0.25s ease;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    background: var(--surface); border: 1px solid var(--border-gold);
+    border-left: 4px solid var(--gold); border-radius: var(--radius-sm);
+    padding: 13px 16px; font-size: 13px; font-weight: 600;
+    box-shadow: var(--shadow-lg); animation: slideIn 0.25s ease;
   }
-  .toast.error { border-left-color: var(--danger); }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(12px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
+  .toast.error { border-left-color: var(--red); border-color: rgba(229, 29, 42, 0.45); }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
 
-  /* ---------- console tray ---------- */
+  /* ---------- API CONSOLE TRAY ---------- */
   .console-tray {
     position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--surface); border-top: 1px solid var(--border);
-    z-index: 30; font-family: var(--font-mono);
+    background: #050507; border-top: 1px solid var(--border);
+    z-index: 40; font-family: var(--font-mono);
   }
   .console-toggle {
-    width: 100%; background: none; border: none; color: var(--text-muted);
-    padding: 11px 24px; display: flex; align-items: center; justify-content: space-between;
-    font-family: var(--font-mono); font-size: 12px;
+    width: 100%; padding: 9px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; color: var(--text-muted);
   }
-  .console-toggle:hover { color: var(--text); }
-  .console-log {
-    max-height: 0; overflow-y: auto;
-    transition: max-height 0.25s ease;
-    border-top: 1px solid transparent;
+  .console-toggle:hover { color: var(--gold); }
+  .console-log { max-height: 0; overflow-y: auto; transition: max-height 0.25s ease; }
+  .console-tray.open .console-log { max-height: 190px; border-top: 1px solid var(--border); }
+  .log-row {
+    display: flex; gap: 12px; padding: 7px 24px; font-size: 11px;
+    border-bottom: 1px solid #14141A; color: var(--text-muted);
   }
-  .console-tray.open .console-log { max-height: 200px; border-top-color: var(--border); }
-  .log-entry {
-    display: flex; gap: 12px; padding: 8px 24px; font-size: 12px;
-    border-bottom: 1px solid var(--border); color: var(--text-muted);
-  }
-  .log-entry .log-time { width: 70px; flex-shrink: 0; }
-  .log-entry .log-method { width: 44px; flex-shrink: 0; color: var(--text); }
-  .log-entry .log-path { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .log-entry .log-status { width: 36px; text-align: right; flex-shrink: 0; font-weight: 600; }
-  .log-status.ok { color: var(--accent); }
-  .log-status.err { color: var(--danger); }
+  .log-method { width: 48px; font-weight: 700; color: var(--gold); }
+  .log-path { flex: 1; color: var(--text); }
+  .log-status.ok { color: var(--success); font-weight: 700; }
+  .log-status.err { color: var(--red); font-weight: 700; }
 
-  @media (max-width: 640px) {
-    .topbar { padding: 14px 16px; }
-    main { padding: 24px 16px 60px; }
-    .drawer { width: 100%; border-radius: 0; }
+  @media (max-width: 720px) {
+    .hero { padding: 24px; }
+    .navbar-inner { padding: 12px 16px; }
+    main { padding: 20px 16px 70px; }
   }
 </style>
 </head>
 <body>
 
-  <header class="topbar">
-    <div class="brand">
-      <span class="status-dot" id="status-dot" title="Verificando conexão..."></span>
-      <span class="brand-name">EasyFood</span>
-      <span class="brand-tag">API</span>
+  <!-- TOPBAR -->
+  <header class="navbar">
+    <div class="navbar-inner">
+      <div class="brand" id="brand-home">
+        <div class="brand-logo">EF</div>
+        <div class="brand-text">
+          <div class="brand-title">Easy<span>Food</span></div>
+          <div class="brand-subtitle">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">Conectando...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-search">
+        <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="search-input" placeholder="Buscar restaurantes ou culinária...">
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn-gold-outline" id="nav-new-restaurant">+ Restaurante</button>
+        <div id="auth-slot"></div>
+        <button class="cart-trigger" id="cart-btn" title="Sacola de pedidos">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span class="cart-badge" id="cart-count">0</span>
+        </button>
+      </div>
     </div>
-    <div id="auth-area"></div>
   </header>
 
-  <main>
-    <div class="section-header">
-      <div>
-        <h1>Restaurantes</h1>
-        <p id="results-count">carregando...</p>
+  <!-- HERO BANNER -->
+  <section class="hero-wrap" id="hero-section">
+    <div class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">★ EasyFood Club • Delivery Premium</div>
+        <h1>A alta gastronomia na sua porta com <span>velocidade e sabor</span>.</h1>
+        <p>Explore restaurantes parceiros, consulte cardápios completos com fotos otimizadas em WebP, cadastre novos pratos e personalize seu perfil.</p>
+        <div class="hero-buttons">
+          <button class="btn-red" id="hero-explore-btn">Explorar Restaurantes</button>
+          <button class="btn-gold-outline" id="hero-profile-btn">Foto de Perfil / Conta</button>
+        </div>
       </div>
-      <button class="primary-btn" id="add-btn">Cadastrar restaurante</button>
+      <div class="hero-stats">
+        <div class="stat-box">
+          <div class="stat-val" id="stat-restaurants">0</div>
+          <div class="stat-lbl">Restaurantes Ativos</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">WebP</div>
+          <div class="stat-lbl">Sharp Image Engine</div>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <div class="controls">
-      <input type="text" class="search-input" id="search-input" placeholder="Buscar por nome">
-    </div>
-    <div class="filter-pills" id="filter-pills"></div>
+  <!-- MAIN CONTENT -->
+  <main>
+    <!-- VIEW 1: LISTA DE RESTAURANTES -->
+    <section id="restaurants-view">
+      <div class="toolbar">
+        <div class="toolbar-title">
+          <h2>Restaurantes em Destaque</h2>
+          <p id="results-count">Carregando catálogo...</p>
+        </div>
+      </div>
 
-    <div id="grid-container"></div>
+      <div class="category-bar" id="filter-pills"></div>
+      <div id="grid-container"></div>
+    </section>
+
+    <!-- VIEW 2: CARDÁPIO DO RESTAURANTE SELECIONADO (PRATOS + UPLOAD DE IMAGEM) -->
+    <section class="menu-view" id="menu-view">
+      <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button class="btn-ghost" id="back-to-restaurants">← Voltar para Restaurantes</button>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-red" id="open-new-dish-btn">+ Cadastrar Novo Prato (com Foto)</button>
+        </div>
+      </div>
+
+      <div class="menu-hero" id="menu-hero"></div>
+
+      <div class="toolbar">
+        <div class="toolbar-title">
+          <h2>Cardápio do Restaurante</h2>
+          <p id="dishes-count">Selecione um prato ou envie/atualize sua foto otimizada</p>
+        </div>
+      </div>
+
+      <div id="dishes-container"></div>
+    </section>
   </main>
 
+  <!-- SIDE DRAWER (LOGIN, PERFIL COM UPLOAD DE FOTO, NOVO RESTAURANTE, NOVO PRATO, UPLOAD FOTO PRATO, SACOLA) -->
   <div class="overlay" id="overlay"></div>
   <aside class="drawer" id="drawer">
     <div class="drawer-header">
-      <strong id="drawer-title">Conta</strong>
+      <strong id="drawer-title">EasyFood</strong>
       <button class="drawer-close" id="drawer-close" aria-label="Fechar">&times;</button>
     </div>
     <div class="drawer-body" id="drawer-body"></div>
   </aside>
 
+  <!-- TOASTS -->
   <div class="toast-stack" id="toast-stack"></div>
 
+  <!-- CONSOLE DE REQUISIÇÕES DA API -->
   <div class="console-tray" id="console-tray">
     <button class="console-toggle" id="console-toggle">
-      <span id="console-label">▲ atividade da api (0)</span>
-      <span>requisições recentes</span>
+      <span id="console-label">▲ Monitor de Requisições HTTP (0)</span>
+      <span>EasyFood API Inspector</span>
     </button>
     <div class="console-log" id="console-log"></div>
   </div>
 
 <script>
-  const API_BASE = 'http://localhost:3000';
+  const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
 
-  // ---------- state ----------
+  // ---------- ESTADO DA APLICAÇÃO ----------
   let restaurants = [];
+  let activeRestaurant = null;
+  let currentDishes = [];
+  let activeDishForPhoto = null;
   let authToken = null;
   let currentUser = null;
   let selectedCategory = 'Todos';
   let searchQuery = '';
   let pendingIntent = null;
-  let apiLog = [];
   let drawerMode = null;
   let authTab = 'login';
+  let cart = [];
+  let apiLog = [];
 
-  // ---------- dom refs ----------
   const el = (id) => document.getElementById(id);
-  const statusDot = el('status-dot');
-  const authArea = el('auth-area');
-  const gridContainer = el('grid-container');
-  const resultsCount = el('results-count');
-  const searchInput = el('search-input');
-  const filterPills = el('filter-pills');
-  const overlay = el('overlay');
-  const drawer = el('drawer');
-  const drawerTitle = el('drawer-title');
-  const drawerBody = el('drawer-body');
-  const toastStack = el('toast-stack');
-  const consoleTray = el('console-tray');
-  const consoleToggle = el('console-toggle');
-  const consoleLog = el('console-log');
-  const consoleLabel = el('console-label');
 
   function escapeHtml(str) {
     const div = document.createElement('div');
-    div.textContent = String(str);
+    div.textContent = String(str ?? '');
     return div.innerHTML;
   }
 
-  // ---------- api wrapper ----------
-  async function api(path, { method = 'GET', body, auth = false } = {}) {
-    const headers = { 'Content-Type': 'application/json' };
-    if (auth && authToken) headers['Authorization'] = 'Bearer ' + authToken;
+  function resolveImageUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+    return API_BASE + url + '?t=' + Date.now();
+  }
+
+  // ---------- CLIENTE HTTP (JSON & MULTIPART/FORM-DATA) ----------
+  async function api(path, { method = 'GET', body, formData, auth = false } = {}) {
+    const headers = {};
+    if (!formData && body !== undefined) {
+      headers['Content-Type'] = 'application/json';
+    }
+    if (auth && authToken) {
+      headers['Authorization'] = 'Bearer ' + authToken;
+    }
 
     const startTime = new Date();
     let status = 0;
@@ -459,19 +676,18 @@
       const response = await fetch(API_BASE + path, {
         method,
         headers,
-        body: body ? JSON.stringify(body) : undefined
+        body: formData ? formData : (body !== undefined ? JSON.stringify(body) : undefined)
       });
       status = response.status;
       setOnline(true);
 
       try { data = await response.json(); } catch (_) { data = null; }
-
       logRequest(method, path, status, startTime);
 
       if (!response.ok) {
-        const error = new Error((data && data.error) || 'Erro na requisição');
-        error.status = status;
-        throw error;
+        const err = new Error((data && data.error) || ('Erro HTTP ' + status));
+        err.status = status;
+        throw err;
       }
       return data;
     } catch (error) {
@@ -484,9 +700,11 @@
   }
 
   function setOnline(isOnline) {
-    statusDot.classList.toggle('online', isOnline);
-    statusDot.classList.toggle('offline', !isOnline);
-    statusDot.title = isOnline ? 'API conectada' : 'API indisponível';
+    const dot = el('status-dot');
+    const txt = el('status-text');
+    dot.classList.toggle('online', isOnline);
+    dot.classList.toggle('offline', !isOnline);
+    txt.textContent = isOnline ? 'API Online' : 'API Offline';
   }
 
   function logRequest(method, path, status, startTime) {
@@ -497,275 +715,597 @@
   }
 
   function renderConsole() {
-    const arrow = consoleTray.classList.contains('open') ? '▼' : '▲';
-    consoleLabel.textContent = arrow + ' atividade da api (' + apiLog.length + ')';
-    consoleLog.innerHTML = apiLog.map(entry => {
+    const tray = el('console-tray');
+    const arrow = tray.classList.contains('open') ? '▼' : '▲';
+    el('console-label').textContent = arrow + ' Monitor de Requisições HTTP (' + apiLog.length + ')';
+    el('console-log').innerHTML = apiLog.map(entry => {
       const cls = entry.status === 'ERR' || entry.status >= 400 ? 'err' : 'ok';
-      return '<div class="log-entry">' +
-        '<span class="log-time">' + entry.time + '</span>' +
+      return '<div class="log-row">' +
+        '<span>' + entry.time + '</span>' +
         '<span class="log-method">' + entry.method + '</span>' +
         '<span class="log-path">' + escapeHtml(entry.path) + '</span>' +
         '<span class="log-status ' + cls + '">' + entry.status + '</span>' +
-        '</div>';
+      '</div>';
     }).join('');
   }
 
-  consoleToggle.addEventListener('click', () => {
-    consoleTray.classList.toggle('open');
+  el('console-toggle').addEventListener('click', () => {
+    el('console-tray').classList.toggle('open');
     renderConsole();
   });
 
-  // ---------- restaurants ----------
-  async function loadRestaurants() {
-    resultsCount.textContent = 'carregando...';
-    try {
-      const data = await api('/restaurants');
-      restaurants = data || [];
-      renderFilters();
-      renderGrid();
-    } catch (error) {
-      resultsCount.textContent = 'indisponível';
-      renderErrorState();
+  // ---------- TOPBAR / AUTENTICAÇÃO ----------
+  function renderAuthSlot() {
+    const slot = el('auth-slot');
+    if (currentUser) {
+      const initial = (currentUser.name || 'U').charAt(0).toUpperCase();
+      const avatarHtml = currentUser.imageUrl
+        ? '<img class="user-avatar" src="' + escapeHtml(resolveImageUrl(currentUser.imageUrl)) + '" alt="Foto">'
+        : '<span class="user-avatar">' + escapeHtml(initial) + '</span>';
+
+      slot.innerHTML =
+        '<button type="button" class="user-pill" id="user-pill-btn">' +
+          avatarHtml +
+          '<div class="user-pill-info">' +
+            '<span class="user-pill-name">' + escapeHtml(currentUser.name) + '</span>' +
+            '<span class="user-pill-action">Alterar foto / Perfil</span>' +
+          '</div>' +
+        '</button>';
+      el('user-pill-btn').addEventListener('click', () => openDrawer('profile'));
+    } else {
+      slot.innerHTML = '<button class="btn-red" id="login-open-btn">Entrar / Criar Conta</button>';
+      el('login-open-btn').addEventListener('click', () => openDrawer('auth', 'login'));
     }
   }
 
-  function renderFilters() {
-    const categories = ['Todos', ...new Set(restaurants.map(r => r.category))];
-    filterPills.innerHTML = categories.map(cat =>
-      '<button class="filter-pill ' + (cat === selectedCategory ? 'active' : '') + '" data-cat="' + escapeHtml(cat) + '">' + escapeHtml(cat) + '</button>'
+  // ---------- RESTAURANTES ----------
+  async function loadRestaurants() {
+    el('results-count').textContent = 'Buscando restaurantes...';
+    try {
+      const data = await api('/restaurants');
+      restaurants = Array.isArray(data) ? data : [];
+      el('stat-restaurants').textContent = String(restaurants.length);
+      renderCategoryPills();
+      renderRestaurantsGrid();
+    } catch (_) {
+      el('results-count').textContent = 'API indisponível no momento';
+      el('grid-container').innerHTML =
+        '<div class="state-box">' +
+          '<h3>Não foi possível conectar ao servidor EasyFood</h3>' +
+          '<p>Certifique-se de que o backend está rodando em <code>http://localhost:3000</code>.</p>' +
+          '<button class="btn-red" id="retry-load-btn">Tentar Novamente</button>' +
+        '</div>';
+      el('retry-load-btn').addEventListener('click', loadRestaurants);
+    }
+  }
+
+  function renderCategoryPills() {
+    const cats = ['Todos', ...new Set(restaurants.map(r => r.category).filter(Boolean))];
+    const container = el('filter-pills');
+    container.innerHTML = cats.map(c =>
+      '<button class="cat-pill ' + (c === selectedCategory ? 'active' : '') + '" data-cat="' + escapeHtml(c) + '">' +
+        escapeHtml(c) +
+      '</button>'
     ).join('');
-    filterPills.querySelectorAll('.filter-pill').forEach(btn => {
+    container.querySelectorAll('.cat-pill').forEach(btn => {
       btn.addEventListener('click', () => {
         selectedCategory = btn.dataset.cat;
-        renderFilters();
-        renderGrid();
+        renderCategoryPills();
+        renderRestaurantsGrid();
       });
     });
   }
 
-  function getFiltered() {
+  function getFilteredRestaurants() {
     return restaurants.filter(r => {
-      const matchCategory = selectedCategory === 'Todos' || r.category === selectedCategory;
-      const matchSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchCategory && matchSearch;
+      const matchCat = selectedCategory === 'Todos' || r.category === selectedCategory;
+      const q = searchQuery.toLowerCase();
+      const matchSearch = !q || r.name.toLowerCase().includes(q) || (r.category && r.category.toLowerCase().includes(q));
+      return matchCat && matchSearch;
     });
   }
 
-  function cardHtml(r) {
-    return '<div class="card">' +
-      '<span class="card-category">' + escapeHtml(r.category) + '</span>' +
-      '<div class="card-name">' + escapeHtml(r.name) + '</div>' +
-      '<div class="card-rating">' +
-        '<svg viewBox="0 0 20 20"><path d="M10 1l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L10 15l-5.6 3 1.4-6.2L1 7.5l6.4-.6L10 1z"/></svg>' +
-        Number(r.rating || 0).toFixed(1) +
-      '</div></div>';
-  }
-
-  function renderGrid() {
-    const filtered = getFiltered();
-    resultsCount.textContent = filtered.length + (filtered.length === 1 ? ' restaurante encontrado' : ' restaurantes encontrados');
+  function renderRestaurantsGrid() {
+    const filtered = getFilteredRestaurants();
+    el('results-count').textContent = filtered.length + (filtered.length === 1 ? ' restaurante disponível' : ' restaurantes disponíveis');
 
     if (restaurants.length === 0) {
-      gridContainer.innerHTML =
-        '<div class="state-panel"><h3>Nenhum restaurante cadastrado ainda</h3>' +
-        '<p>Cadastre o primeiro restaurante da EasyFood para começar.</p>' +
-        '<button class="primary-btn" id="empty-add-btn">Cadastrar restaurante</button></div>';
-      el('empty-add-btn').addEventListener('click', handleAddClick);
+      el('grid-container').innerHTML =
+        '<div class="state-box">' +
+          '<h3>Nenhum restaurante cadastrado</h3>' +
+          '<p>Comece cadastrando o primeiro restaurante parceiro na plataforma EasyFood.</p>' +
+          '<button class="btn-red" id="empty-new-rest-btn">+ Cadastrar Primeiro Restaurante</button>' +
+        '</div>';
+      el('empty-new-rest-btn').addEventListener('click', () => requireAuthThen(() => openDrawer('add-restaurant')));
       return;
     }
 
     if (filtered.length === 0) {
-      gridContainer.innerHTML =
-        '<div class="state-panel"><h3>Nenhum resultado</h3>' +
-        '<p>Não encontramos restaurantes' + (searchQuery ? ' para "' + escapeHtml(searchQuery) + '"' : '') + ' em ' + escapeHtml(selectedCategory) + '.</p>' +
-        '<button class="primary-btn" id="clear-filters-btn">Limpar busca</button></div>';
-      el('clear-filters-btn').addEventListener('click', clearFilters);
+      el('grid-container').innerHTML =
+        '<div class="state-box">' +
+          '<h3>Nenhum restaurante encontrado para esse filtro</h3>' +
+          '<p>Tente buscar por outro termo ou limpar a categoria selecionada.</p>' +
+          '<button class="btn-gold-outline" id="reset-search-btn">Mostrar Todos</button>' +
+        '</div>';
+      el('reset-search-btn').addEventListener('click', () => {
+        selectedCategory = 'Todos';
+        searchQuery = '';
+        el('search-input').value = '';
+        renderCategoryPills();
+        renderRestaurantsGrid();
+      });
       return;
     }
 
-    gridContainer.innerHTML = '<div class="grid">' + filtered.map(cardHtml).join('') + '</div>';
+    el('grid-container').innerHTML = '<div class="restaurant-grid">' + filtered.map(r => {
+      const initial = (r.name || 'R').charAt(0).toUpperCase();
+      return '<article class="rest-card">' +
+        '<div class="rest-banner">' +
+          '<span class="rest-cat-badge">' + escapeHtml(r.category) + '</span>' +
+          '<span class="rest-rating-badge">★ ' + Number(r.rating || 0).toFixed(1) + '</span>' +
+          '<div class="rest-icon-circle">' + escapeHtml(initial) + '</div>' +
+        '</div>' +
+        '<div class="rest-body">' +
+          '<div>' +
+            '<div class="rest-title">' + escapeHtml(r.name) + '</div>' +
+            '<div class="rest-meta"><span>Entrega 25-40 min</span><span>•</span><span>Cardápio Digital</span></div>' +
+          '</div>' +
+          '<div class="rest-actions">' +
+            '<button class="rest-btn-primary" data-open-menu="' + r.id + '">Abrir Cardápio & Pratos →</button>' +
+          '</div>' +
+        '</div>' +
+      '</article>';
+    }).join('') + '</div>';
+
+    el('grid-container').querySelectorAll('[data-open-menu]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const rest = restaurants.find(x => x.id === Number(btn.dataset.openMenu));
+        if (rest) openRestaurantMenu(rest);
+      });
+    });
   }
 
-  function renderErrorState() {
-    gridContainer.innerHTML =
-      '<div class="state-panel"><h3>Não foi possível conectar à API</h3>' +
-      '<p>Verifique se o servidor está rodando (<code>node server.js</code>) na porta 3000.</p>' +
-      '<button class="primary-btn" id="retry-btn">Tentar novamente</button></div>';
-    el('retry-btn').addEventListener('click', loadRestaurants);
+  // ---------- VISÃO DE CARDÁPIO E PRATOS ----------
+  async function openRestaurantMenu(restaurant) {
+    activeRestaurant = restaurant;
+    el('restaurants-view').style.display = 'none';
+    el('hero-section').style.display = 'none';
+    el('menu-view').classList.add('active');
+
+    const initial = (restaurant.name || 'R').charAt(0).toUpperCase();
+    el('menu-hero').innerHTML =
+      '<div class="menu-hero-left">' +
+        '<div class="menu-hero-avatar">' + escapeHtml(initial) + '</div>' +
+        '<div class="menu-hero-info">' +
+          '<h2>' + escapeHtml(restaurant.name) + '</h2>' +
+          '<div class="menu-hero-tags">' +
+            '<span class="gold-tag">★ ' + Number(restaurant.rating || 0).toFixed(1) + '</span>' +
+            '<span>•</span>' +
+            '<span>' + escapeHtml(restaurant.category) + '</span>' +
+            '<span>•</span>' +
+            '<span>ID #' + restaurant.id + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div>' +
+        '<button class="btn-gold-outline" id="hero-add-dish-btn">+ Adicionar Prato ao Cardápio</button>' +
+      '</div>';
+
+    el('hero-add-dish-btn').addEventListener('click', () => {
+      requireAuthThen(() => openDrawer('add-dish'));
+    });
+
+    await loadDishesForActiveRestaurant();
   }
 
-  function clearFilters() {
-    selectedCategory = 'Todos';
-    searchQuery = '';
-    searchInput.value = '';
-    renderFilters();
-    renderGrid();
-  }
-
-  searchInput.addEventListener('input', (e) => {
-    searchQuery = e.target.value;
-    renderGrid();
-  });
-
-  // ---------- auth area (topbar) ----------
-  function renderAuthArea() {
-    if (currentUser) {
-      const initial = currentUser.name.charAt(0).toUpperCase();
-      authArea.innerHTML =
-        '<div class="identity-pill" id="identity-pill">' +
-        '<span class="identity-avatar">' + escapeHtml(initial) + '</span>' +
-        '<span>' + escapeHtml(currentUser.name) + '</span></div>';
-      el('identity-pill').addEventListener('click', () => openDrawer('profile'));
-    } else {
-      authArea.innerHTML = '<button class="ghost-btn" id="login-trigger">Entrar</button>';
-      el('login-trigger').addEventListener('click', () => openDrawer('auth', 'login'));
+  async function loadDishesForActiveRestaurant() {
+    if (!activeRestaurant) return;
+    el('dishes-count').textContent = 'Carregando pratos do cardápio...';
+    try {
+      const list = await api('/restaurants/' + activeRestaurant.id + '/dishes');
+      currentDishes = Array.isArray(list) ? list : [];
+      renderDishesGrid();
+    } catch (error) {
+      showToast(error.message || 'Erro ao carregar pratos.', 'error');
     }
   }
 
-  // ---------- drawer ----------
+  function renderDishesGrid() {
+    el('dishes-count').textContent = currentDishes.length + (currentDishes.length === 1 ? ' prato cadastrado neste cardápio' : ' pratos cadastrados neste cardápio');
+
+    if (currentDishes.length === 0) {
+      el('dishes-container').innerHTML =
+        '<div class="state-box">' +
+          '<h3>Este restaurante ainda não possui pratos no cardápio</h3>' +
+          '<p>Cadastre o primeiro prato agora mesmo e envie uma foto (JPEG, PNG ou WebP) para otimização automática com Sharp.</p>' +
+          '<button class="btn-red" id="empty-add-dish-btn">+ Cadastrar Primeiro Prato com Foto</button>' +
+        '</div>';
+      el('empty-add-dish-btn').addEventListener('click', () => {
+        requireAuthThen(() => openDrawer('add-dish'));
+      });
+      return;
+    }
+
+    el('dishes-container').innerHTML = '<div class="dishes-grid">' + currentDishes.map(d => {
+      const hasImg = Boolean(d.imageUrl);
+      const mediaHtml = hasImg
+        ? '<img src="' + escapeHtml(resolveImageUrl(d.imageUrl)) + '" alt="' + escapeHtml(d.name) + '">'
+        : '<div class="dish-placeholder">' +
+            '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' +
+            '<span>Sem foto cadastrada</span>' +
+          '</div>';
+
+      return '<article class="dish-card">' +
+        '<div>' +
+          '<div class="dish-media">' +
+            mediaHtml +
+            '<button class="dish-photo-btn" data-dish-photo="' + d.id + '">' +
+              '📷 ' + (hasImg ? 'Trocar Foto' : 'Enviar Foto') +
+            '</button>' +
+            '<span class="dish-price-pill">R$ ' + Number(d.price || 0).toFixed(2) + '</span>' +
+          '</div>' +
+          '<div class="dish-content">' +
+            '<div>' +
+              '<div class="dish-title">' + escapeHtml(d.name) + '</div>' +
+              '<div class="dish-desc">' + escapeHtml(d.description || 'Prato especial preparado na hora.') + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="padding: 0 20px 18px;">' +
+          '<div class="dish-footer">' +
+            '<button class="btn-add-cart" data-add-cart="' + d.id + '">+ Adicionar à Sacola</button>' +
+            '<button class="btn-ghost" data-dish-photo="' + d.id + '" title="Upload de imagem do prato">Foto</button>' +
+          '</div>' +
+        '</div>' +
+      '</article>';
+    }).join('') + '</div>';
+
+    el('dishes-container').querySelectorAll('[data-dish-photo]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const dish = currentDishes.find(x => x.id === Number(btn.dataset.dishPhoto));
+        if (!dish) return;
+        activeDishForPhoto = dish;
+        requireAuthThen(() => openDrawer('dish-photo'));
+      });
+    });
+
+    el('dishes-container').querySelectorAll('[data-add-cart]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const dish = currentDishes.find(x => x.id === Number(btn.dataset.addCart));
+        if (dish) addToCart(dish);
+      });
+    });
+  }
+
+  function showRestaurantsCatalog() {
+    el('menu-view').classList.remove('active');
+    el('hero-section').style.display = 'block';
+    el('restaurants-view').style.display = 'block';
+  }
+
+  el('back-to-restaurants').addEventListener('click', showRestaurantsCatalog);
+  el('brand-home').addEventListener('click', showRestaurantsCatalog);
+  el('hero-explore-btn').addEventListener('click', () => {
+    showRestaurantsCatalog();
+    el('restaurants-view').scrollIntoView({ behavior: 'smooth' });
+  });
+  el('hero-profile-btn').addEventListener('click', () => {
+    if (currentUser) openDrawer('profile');
+    else {
+      pendingIntent = () => openDrawer('profile');
+      openDrawer('auth', 'login');
+    }
+  });
+  el('nav-new-restaurant').addEventListener('click', () => {
+    requireAuthThen(() => openDrawer('add-restaurant'));
+  });
+  el('open-new-dish-btn').addEventListener('click', () => {
+    requireAuthThen(() => openDrawer('add-dish'));
+  });
+  el('cart-btn').addEventListener('click', () => openDrawer('cart'));
+
+  el('search-input').addEventListener('input', (e) => {
+    searchQuery = e.target.value;
+    if (el('menu-view').classList.contains('active')) {
+      showRestaurantsCatalog();
+    }
+    renderRestaurantsGrid();
+  });
+
+  function requireAuthThen(actionFn) {
+    if (currentUser && authToken) {
+      actionFn();
+    } else {
+      pendingIntent = actionFn;
+      openDrawer('auth', 'login');
+      showToast('Faça login ou crie uma conta para realizar esta operação.', 'error');
+    }
+  }
+
+  // ---------- SACOLA DE DELIVERY ----------
+  function addToCart(dish) {
+    const existing = cart.find(item => item.dish.id === dish.id);
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      cart.push({ dish, restaurantName: activeRestaurant ? activeRestaurant.name : 'EasyFood', qty: 1 });
+    }
+    updateCartBadge();
+    showToast('"' + dish.name + '" adicionado à sacola!');
+  }
+
+  function updateCartBadge() {
+    const totalQty = cart.reduce((acc, item) => acc + item.qty, 0);
+    el('cart-count').textContent = String(totalQty);
+  }
+
+  // ---------- DRAWER E FORMULÁRIOS ----------
   function openDrawer(mode, tab) {
     drawerMode = mode;
     if (tab) authTab = tab;
-    overlay.classList.add('open');
-    drawer.classList.add('open');
-    renderDrawer();
+    el('overlay').classList.add('open');
+    el('drawer').classList.add('open');
+    renderDrawerContent();
   }
 
   function closeDrawer() {
-    overlay.classList.remove('open');
-    drawer.classList.remove('open');
+    el('overlay').classList.remove('open');
+    el('drawer').classList.remove('open');
   }
 
-  overlay.addEventListener('click', closeDrawer);
+  el('overlay').addEventListener('click', closeDrawer);
   el('drawer-close').addEventListener('click', closeDrawer);
 
-  function renderDrawer() {
+  function renderDrawerContent() {
+    const title = el('drawer-title');
+    const body = el('drawer-body');
+
     if (drawerMode === 'auth') {
-      drawerTitle.textContent = 'Conta';
-      drawerBody.innerHTML = authTemplate();
-      bindAuthForms();
-    } else if (drawerMode === 'add') {
-      drawerTitle.textContent = 'Cadastrar restaurante';
-      drawerBody.innerHTML = addRestaurantTemplate();
-      bindAddForm();
-    } else if (drawerMode === 'profile') {
-      drawerTitle.textContent = 'Minha conta';
-      drawerBody.innerHTML = profileTemplate();
-      bindProfileActions();
+      title.textContent = 'Acesso EasyFood';
+      body.innerHTML =
+        '<div class="tab-bar">' +
+          '<button class="tab-item ' + (authTab === 'login' ? 'active' : '') + '" data-tab="login">Entrar</button>' +
+          '<button class="tab-item ' + (authTab === 'register' ? 'active' : '') + '" data-tab="register">Criar Conta</button>' +
+        '</div>' +
+        (authTab === 'login' ?
+          '<form id="login-form" novalidate>' +
+            '<div class="field" id="f-login-email"><label>E-mail</label><input type="email" id="login-email" placeholder="cliente@easyfood.com"><div class="field-error">Informe seu e-mail.</div></div>' +
+            '<div class="field" id="f-login-pass"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••"><div class="field-error">Informe sua senha.</div></div>' +
+            '<button type="submit" class="btn-submit" id="login-submit">Entrar na Plataforma</button>' +
+          '</form>'
+        :
+          '<form id="register-form" novalidate>' +
+            '<div class="field" id="f-reg-name"><label>Nome Completo</label><input type="text" id="reg-name" placeholder="Seu nome"><div class="field-error">Informe seu nome.</div></div>' +
+            '<div class="field" id="f-reg-email"><label>E-mail</label><input type="email" id="reg-email" placeholder="seu@email.com"><div class="field-error">Informe um e-mail válido.</div></div>' +
+            '<div class="field" id="f-reg-pass"><label>Senha</label><input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"><div class="field-error">A senha deve ter pelo menos 6 caracteres.</div></div>' +
+            '<button type="submit" class="btn-submit" id="reg-submit">Criar Conta e Continuar</button>' +
+          '</form>'
+        );
+
+      body.querySelectorAll('.tab-item').forEach(btn => {
+        btn.addEventListener('click', () => { authTab = btn.dataset.tab; renderDrawerContent(); });
+      });
+      const lf = el('login-form');
+      if (lf) lf.addEventListener('submit', handleLoginSubmit);
+      const rf = el('register-form');
+      if (rf) rf.addEventListener('submit', handleRegisterSubmit);
+      return;
+    }
+
+    if (drawerMode === 'profile' && currentUser) {
+      title.textContent = 'Meu Perfil & Foto (JWT)';
+      const initial = (currentUser.name || 'U').charAt(0).toUpperCase();
+      const avatarContent = currentUser.imageUrl
+        ? '<img id="profile-preview-img" src="' + escapeHtml(resolveImageUrl(currentUser.imageUrl)) + '" style="width:100%;height:100%;object-fit:cover;" alt="Avatar">'
+        : '<span id="profile-preview-initial">' + escapeHtml(initial) + '</span>';
+
+      body.innerHTML =
+        '<div class="upload-card">' +
+          '<div class="upload-preview" id="profile-preview-box">' + avatarContent + '</div>' +
+          '<div style="font-weight:700;font-size:16px;">' + escapeHtml(currentUser.name) + '</div>' +
+          '<div style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">' + escapeHtml(currentUser.email) + '</div>' +
+          (currentUser.imageUrl ? '<div style="font-size:11px;color:var(--gold);font-family:var(--font-mono);margin-bottom:8px;">' + escapeHtml(currentUser.imageUrl) + '</div>' : '') +
+          '<form id="profile-upload-form">' +
+            '<label class="upload-input-label" for="profile-file-input">📁 Escolher Nova Foto de Perfil</label>' +
+            '<input type="file" id="profile-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;">' +
+            '<div class="upload-hint" id="profile-file-name">Formatos aceitos: JPEG, PNG ou WebP (máx. 5 MB)</div>' +
+            '<button type="submit" class="btn-gold-full" id="profile-upload-btn" style="margin-top:14px;">Salvar Foto no Perfil (POST /auth/me/image)</button>' +
+          '</form>' +
+        '</div>' +
+        '<button class="btn-ghost" style="width:100%;justify-content:center;margin-bottom:10px;" id="btn-refresh-me">Sincronizar Dados (GET /auth/me)</button>' +
+        '<button class="btn-ghost" style="width:100%;justify-content:center;color:#FF6B74;border-color:rgba(229,29,42,0.4);" id="btn-logout">Sair da Conta</button>';
+
+      const fileInput = el('profile-file-input');
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files[0]) {
+          const f = fileInput.files[0];
+          el('profile-file-name').textContent = 'Selecionado: ' + f.name + ' (' + (f.size / 1024).toFixed(1) + ' KB)';
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            el('profile-preview-box').innerHTML = '<img src="' + ev.target.result + '" style="width:100%;height:100%;object-fit:cover;" alt="Preview">';
+          };
+          reader.readAsDataURL(f);
+        }
+      });
+
+      el('profile-upload-form').addEventListener('submit', handleProfilePhotoUpload);
+      el('btn-refresh-me').addEventListener('click', handleRefreshMe);
+      el('btn-logout').addEventListener('click', () => {
+        authToken = null;
+        currentUser = null;
+        renderAuthSlot();
+        closeDrawer();
+        showToast('Sessão encerrada com sucesso.');
+      });
+      return;
+    }
+
+    if (drawerMode === 'add-restaurant') {
+      title.textContent = 'Novo Restaurante Parceiro';
+      body.innerHTML =
+        '<form id="add-rest-form" novalidate>' +
+          '<div class="field" id="f-rest-name"><label>Nome do Restaurante</label><input type="text" id="rest-name" placeholder="Ex: Dom Giovanni Trattoria"><div class="field-error">Informe o nome do restaurante.</div></div>' +
+          '<div class="field" id="f-rest-cat"><label>Categoria / Culinária</label><input type="text" id="rest-cat" placeholder="Ex: Italiana, Japonesa, Hambúrguer..."><div class="field-error">Informe a categoria.</div></div>' +
+          '<div class="field"><label>Avaliação Inicial (0 a 5)</label><input type="number" id="rest-rating" min="0" max="5" step="0.1" value="4.8"></div>' +
+          '<button type="submit" class="btn-submit" id="rest-submit">Cadastrar Restaurante</button>' +
+        '</form>';
+      el('add-rest-form').addEventListener('submit', handleCreateRestaurant);
+      return;
+    }
+
+    if (drawerMode === 'add-dish' && activeRestaurant) {
+      title.textContent = 'Novo Prato — ' + activeRestaurant.name;
+      body.innerHTML =
+        '<form id="add-dish-form" novalidate>' +
+          '<div class="field" id="f-dish-name"><label>Nome do Prato</label><input type="text" id="dish-name" placeholder="Ex: Risoto de Camarão Trufado"><div class="field-error">O nome do prato é obrigatório.</div></div>' +
+          '<div class="field"><label>Descrição / Ingredientes</label><textarea id="dish-desc" rows="3" placeholder="Arroz arbóreo, camarões grelhados, azeite trufado e parmesão..."></textarea></div>' +
+          '<div class="field" id="f-dish-price"><label>Preço (R$)</label><input type="number" id="dish-price" min="0" step="0.01" value="54.90"><div class="field-error">Informe um preço válido.</div></div>' +
+          '<div class="upload-card">' +
+            '<div class="upload-preview rect" id="new-dish-preview">📷 Prévia da Foto do Prato (Opcional)</div>' +
+            '<label class="upload-input-label" for="new-dish-file">Escolher Foto do Prato</label>' +
+            '<input type="file" id="new-dish-file" accept="image/jpeg,image/png,image/webp" style="display:none;">' +
+            '<div class="upload-hint" id="new-dish-file-name">Se selecionada, a foto será enviada e otimizada com Sharp logo após criar o prato.</div>' +
+          '</div>' +
+          '<button type="submit" class="btn-submit" id="dish-submit">Cadastrar Prato no Cardápio</button>' +
+        '</form>';
+
+      const fileInput = el('new-dish-file');
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files[0]) {
+          const f = fileInput.files[0];
+          el('new-dish-file-name').textContent = 'Arquivo: ' + f.name + ' (' + (f.size / 1024).toFixed(1) + ' KB)';
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            el('new-dish-preview').innerHTML = '<img src="' + ev.target.result + '" style="width:100%;height:100%;object-fit:cover;" alt="Preview">';
+          };
+          reader.readAsDataURL(f);
+        }
+      });
+
+      el('add-dish-form').addEventListener('submit', handleCreateDishWithOptionalPhoto);
+      return;
+    }
+
+    if (drawerMode === 'dish-photo' && activeDishForPhoto) {
+      title.textContent = 'Foto do Prato #' + activeDishForPhoto.id;
+      const existingImg = activeDishForPhoto.imageUrl
+        ? '<img src="' + escapeHtml(resolveImageUrl(activeDishForPhoto.imageUrl)) + '" style="width:100%;height:100%;object-fit:cover;" alt="Prato">'
+        : '📷 Nenhuma foto vinculada';
+
+      body.innerHTML =
+        '<div style="margin-bottom:14px;">' +
+          '<div style="font-size:16px;font-weight:800;">' + escapeHtml(activeDishForPhoto.name) + '</div>' +
+          '<div style="font-size:13px;color:var(--gold);font-family:var(--font-mono);">R$ ' + Number(activeDishForPhoto.price || 0).toFixed(2) + '</div>' +
+        '</div>' +
+        '<div class="upload-card">' +
+          '<div class="upload-preview rect" id="dish-photo-preview">' + existingImg + '</div>' +
+          '<form id="dish-photo-form">' +
+            '<label class="upload-input-label" for="dish-photo-input">📁 Selecionar Imagem (JPEG, PNG, WebP)</label>' +
+            '<input type="file" id="dish-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none;">' +
+            '<div class="upload-hint" id="dish-photo-filename">A imagem será convertida para WebP (800px) pelo Sharp.</div>' +
+            '<button type="submit" class="btn-gold-full" id="dish-photo-submit" style="margin-top:14px;">Enviar Foto (POST /dishes/' + activeDishForPhoto.id + '/image)</button>' +
+          '</form>' +
+        '</div>';
+
+      const fileInput = el('dish-photo-input');
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files[0]) {
+          const f = fileInput.files[0];
+          el('dish-photo-filename').textContent = 'Selecionado: ' + f.name + ' (' + (f.size / 1024).toFixed(1) + ' KB)';
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            el('dish-photo-preview').innerHTML = '<img src="' + ev.target.result + '" style="width:100%;height:100%;object-fit:cover;" alt="Preview">';
+          };
+          reader.readAsDataURL(f);
+        }
+      });
+
+      el('dish-photo-form').addEventListener('submit', handleSingleDishPhotoUpload);
+      return;
+    }
+
+    if (drawerMode === 'cart') {
+      title.textContent = 'Sua Sacola EasyFood';
+      if (cart.length === 0) {
+        body.innerHTML =
+          '<div class="state-box">' +
+            '<h3>Sua sacola está vazia</h3>' +
+            '<p>Abra o cardápio de um restaurante e adicione seus pratos favoritos.</p>' +
+          '</div>';
+        return;
+      }
+
+      const total = cart.reduce((sum, item) => sum + Number(item.dish.price || 0) * item.qty, 0);
+      body.innerHTML =
+        cart.map((item, idx) =>
+          '<div class="cart-item">' +
+            '<div>' +
+              '<div class="cart-item-title">' + escapeHtml(item.dish.name) + '</div>' +
+              '<div class="cart-item-sub">R$ ' + Number(item.dish.price || 0).toFixed(2) + ' • ' + escapeHtml(item.restaurantName) + '</div>' +
+            '</div>' +
+            '<div class="cart-qty">' +
+              '<button class="qty-btn" data-cart-dec="' + idx + '">-</button>' +
+              '<span>' + item.qty + '</span>' +
+              '<button class="qty-btn" data-cart-inc="' + idx + '">+</button>' +
+            '</div>' +
+          '</div>'
+        ).join('') +
+        '<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:16px;font-weight:800;">' +
+          '<span>Total do Pedido</span>' +
+          '<span style="color:var(--gold);font-family:var(--font-mono);">R$ ' + total.toFixed(2) + '</span>' +
+        '</div>' +
+        '<button class="btn-submit" style="margin-top:16px;" id="checkout-btn">Finalizar Pedido</button>';
+
+      body.querySelectorAll('[data-cart-dec]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = Number(btn.dataset.cartDec);
+          cart[i].qty -= 1;
+          if (cart[i].qty <= 0) cart.splice(i, 1);
+          updateCartBadge();
+          renderDrawerContent();
+        });
+      });
+      body.querySelectorAll('[data-cart-inc]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = Number(btn.dataset.cartInc);
+          cart[i].qty += 1;
+          updateCartBadge();
+          renderDrawerContent();
+        });
+      });
+      el('checkout-btn').addEventListener('click', () => {
+        cart = [];
+        updateCartBadge();
+        closeDrawer();
+        showToast('Pedido enviado para a cozinha com sucesso!');
+      });
     }
   }
 
-  function authTemplate() {
-    return (pendingIntent === 'add' ? '<div class="form-note">Faça login para cadastrar um restaurante.</div>' : '') +
-      '<div class="tab-switch">' +
-        '<button class="tab-btn ' + (authTab === 'login' ? 'active' : '') + '" data-tab="login">Entrar</button>' +
-        '<button class="tab-btn ' + (authTab === 'register' ? 'active' : '') + '" data-tab="register">Criar conta</button>' +
-      '</div>' +
-      (authTab === 'login' ? loginFormHtml() : registerFormHtml());
-  }
-
-  function loginFormHtml() {
-    return '<form id="login-form" novalidate>' +
-      '<div class="field" id="field-login-email"><label for="login-email">E-mail</label>' +
-      '<input type="email" id="login-email" autocomplete="email"><div class="field-error">Informe um e-mail válido.</div></div>' +
-      '<div class="field password-field" id="field-login-password"><label for="login-password">Senha</label>' +
-      '<input type="password" id="login-password" autocomplete="current-password">' +
-      '<button type="button" class="password-toggle" data-target="login-password">mostrar</button>' +
-      '<div class="field-error">Informe sua senha.</div></div>' +
-      '<button type="submit" class="submit-btn" id="login-submit">Entrar</button></form>';
-  }
-
-  function registerFormHtml() {
-    return '<form id="register-form" novalidate>' +
-      '<div class="field" id="field-register-name"><label for="register-name">Nome</label>' +
-      '<input type="text" id="register-name" autocomplete="name"><div class="field-error">Informe seu nome.</div></div>' +
-      '<div class="field" id="field-register-email"><label for="register-email">E-mail</label>' +
-      '<input type="email" id="register-email" autocomplete="email"><div class="field-error">Informe um e-mail válido.</div></div>' +
-      '<div class="field password-field" id="field-register-password"><label for="register-password">Senha</label>' +
-      '<input type="password" id="register-password" autocomplete="new-password">' +
-      '<button type="button" class="password-toggle" data-target="register-password">mostrar</button>' +
-      '<div class="field-error">Mínimo de 6 caracteres.</div></div>' +
-      '<button type="submit" class="submit-btn" id="register-submit">Criar conta</button></form>';
-  }
-
-  function addRestaurantTemplate() {
-    return '<form id="add-form" novalidate>' +
-      '<div class="field" id="field-add-name"><label for="add-name">Nome do restaurante</label>' +
-      '<input type="text" id="add-name"><div class="field-error">Informe o nome.</div></div>' +
-      '<div class="field" id="field-add-category"><label for="add-category">Categoria</label>' +
-      '<input type="text" id="add-category" placeholder="Ex: Italiana, Japonesa..."><div class="field-error">Informe a categoria.</div></div>' +
-      '<div class="field"><label for="add-rating">Nota (0 a 5)</label>' +
-      '<input type="number" id="add-rating" min="0" max="5" step="0.1" value="4.5"></div>' +
-      '<button type="submit" class="submit-btn" id="add-submit">Cadastrar</button></form>';
-  }
-
-  function profileTemplate() {
-    const initial = currentUser.name.charAt(0).toUpperCase();
-    return '<div class="profile-card"><span class="profile-avatar">' + escapeHtml(initial) + '</span>' +
-      '<div><div class="profile-name">' + escapeHtml(currentUser.name) + '</div>' +
-      '<div class="profile-email">' + escapeHtml(currentUser.email) + '</div></div></div>' +
-      '<button class="secondary-btn" id="add-from-profile">Cadastrar restaurante</button>' +
-      '<button class="secondary-btn" id="test-me">Verificar sessão (GET /auth/me)</button>' +
-      '<button class="danger-btn" id="logout-btn">Sair</button>';
-  }
-
-  function bindAuthForms() {
-    drawerBody.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => { authTab = btn.dataset.tab; renderDrawer(); });
-    });
-    drawerBody.querySelectorAll('.password-toggle').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const input = document.getElementById(btn.dataset.target);
-        const isPassword = input.type === 'password';
-        input.type = isPassword ? 'text' : 'password';
-        btn.textContent = isPassword ? 'ocultar' : 'mostrar';
-      });
-    });
-    const loginForm = el('login-form');
-    if (loginForm) loginForm.addEventListener('submit', handleLogin);
-    const registerForm = el('register-form');
-    if (registerForm) registerForm.addEventListener('submit', handleRegister);
-  }
-
-  function bindAddForm() {
-    el('add-form').addEventListener('submit', handleAddRestaurant);
-  }
-
-  function bindProfileActions() {
-    el('add-from-profile').addEventListener('click', () => openDrawer('add'));
-    el('test-me').addEventListener('click', handleTestMe);
-    el('logout-btn').addEventListener('click', handleLogout);
-  }
-
-  function setFieldError(fieldId, hasError) {
-    const field = document.getElementById(fieldId);
-    if (field) field.classList.toggle('has-error', hasError);
-  }
-
-  // ---------- handlers ----------
-  async function handleLogin(e) {
+  // ---------- HANDLERS DE AÇÃO ----------
+  async function handleLoginSubmit(e) {
     e.preventDefault();
     const email = el('login-email').value.trim();
-    const password = el('login-password').value;
-
-    setFieldError('field-login-email', !email);
-    setFieldError('field-login-password', !password);
+    const password = el('login-pass').value;
+    el('f-login-email').classList.toggle('has-error', !email);
+    el('f-login-pass').classList.toggle('has-error', !password);
     if (!email || !password) return;
 
     const btn = el('login-submit');
     btn.disabled = true;
-    btn.textContent = 'Entrando...';
+    btn.textContent = 'Autenticando...';
 
     try {
       const data = await api('/auth/login', { method: 'POST', body: { email, password } });
       authToken = data.token;
       currentUser = data.user;
-      renderAuthArea();
-      showToast('Bem-vindo(a), ' + currentUser.name + '.', 'success');
+      renderAuthSlot();
+      showToast('Bem-vindo(a), ' + currentUser.name + '!');
 
-      if (pendingIntent === 'add') {
+      if (typeof pendingIntent === 'function') {
+        const fn = pendingIntent;
         pendingIntent = null;
-        openDrawer('add');
+        fn();
       } else {
         closeDrawer();
       }
@@ -773,112 +1313,198 @@
       showToast(error.message || 'Credenciais inválidas.', 'error');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Entrar';
+      btn.textContent = 'Entrar na Plataforma';
     }
   }
 
-  async function handleRegister(e) {
+  async function handleRegisterSubmit(e) {
     e.preventDefault();
-    const name = el('register-name').value.trim();
-    const email = el('register-email').value.trim();
-    const password = el('register-password').value;
-
-    setFieldError('field-register-name', !name);
-    setFieldError('field-register-email', !email);
-    setFieldError('field-register-password', password.length < 6);
+    const name = el('reg-name').value.trim();
+    const email = el('reg-email').value.trim();
+    const password = el('reg-pass').value;
+    el('f-reg-name').classList.toggle('has-error', !name);
+    el('f-reg-email').classList.toggle('has-error', !email);
+    el('f-reg-pass').classList.toggle('has-error', password.length < 6);
     if (!name || !email || password.length < 6) return;
 
-    const btn = el('register-submit');
+    const btn = el('reg-submit');
     btn.disabled = true;
-    btn.textContent = 'Criando...';
+    btn.textContent = 'Criando conta...';
 
     try {
       await api('/auth/register', { method: 'POST', body: { name, email, password } });
-      showToast('Conta criada. Agora faça login.', 'success');
-      authTab = 'login';
-      renderDrawer();
-      el('login-email').value = email;
+      const loginData = await api('/auth/login', { method: 'POST', body: { email, password } });
+      authToken = loginData.token;
+      currentUser = loginData.user;
+      renderAuthSlot();
+      showToast('Conta criada e autenticada com sucesso!');
+      openDrawer('profile');
     } catch (error) {
       showToast(error.message || 'Erro ao criar conta.', 'error');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Criar conta';
+      btn.textContent = 'Criar Conta e Continuar';
     }
   }
 
-  async function handleAddRestaurant(e) {
+  async function handleProfilePhotoUpload(e) {
     e.preventDefault();
-    const name = el('add-name').value.trim();
-    const category = el('add-category').value.trim();
-    const rating = parseFloat(el('add-rating').value) || 0;
+    const input = el('profile-file-input');
+    if (!input.files || !input.files[0]) {
+      showToast('Escolha uma imagem JPEG, PNG ou WebP primeiro.', 'error');
+      return;
+    }
 
-    setFieldError('field-add-name', !name);
-    setFieldError('field-add-category', !category);
-    if (!name || !category) return;
+    const formData = new FormData();
+    formData.append('image', input.files[0]);
 
-    const btn = el('add-submit');
+    const btn = el('profile-upload-btn');
     btn.disabled = true;
-    btn.textContent = 'Cadastrando...';
+    btn.textContent = 'Otimizando com Sharp e salvando...';
 
     try {
-      await api('/restaurants', { method: 'POST', auth: true, body: { name, category, rating } });
-      showToast('"' + name + '" cadastrado com sucesso.', 'success');
-      closeDrawer();
-      loadRestaurants();
+      const updatedUser = await api('/auth/me/image', { method: 'POST', auth: true, formData });
+      currentUser = updatedUser;
+      renderAuthSlot();
+      renderDrawerContent();
+      showToast('Foto de perfil atualizada com sucesso!');
     } catch (error) {
-      if (error.status === 401) {
-        showToast('Sessão expirada. Faça login novamente.', 'error');
-        authToken = null;
-        currentUser = null;
-        renderAuthArea();
-        openDrawer('auth', 'login');
-      } else {
-        showToast(error.message || 'Erro ao cadastrar.', 'error');
-      }
+      showToast(error.message || 'Falha ao enviar foto de perfil.', 'error');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Cadastrar';
+      btn.textContent = 'Salvar Foto no Perfil (POST /auth/me/image)';
     }
   }
 
-  async function handleTestMe() {
+  async function handleRefreshMe() {
     try {
       const data = await api('/auth/me', { auth: true });
-      showToast('Sessão válida: ' + data.user.email, 'success');
+      currentUser = data.user;
+      renderAuthSlot();
+      renderDrawerContent();
+      showToast('Perfil sincronizado: ' + currentUser.email);
     } catch (error) {
-      showToast('Sessão inválida ou expirada.', 'error');
+      showToast(error.message || 'Sessão inválida.', 'error');
     }
   }
 
-  function handleLogout() {
-    authToken = null;
-    currentUser = null;
-    renderAuthArea();
-    closeDrawer();
-    showToast('Você saiu da conta.', 'success');
-  }
+  async function handleCreateRestaurant(e) {
+    e.preventDefault();
+    const name = el('rest-name').value.trim();
+    const category = el('rest-cat').value.trim();
+    const rating = parseFloat(el('rest-rating').value) || 0;
+    el('f-rest-name').classList.toggle('has-error', !name);
+    el('f-rest-cat').classList.toggle('has-error', !category);
+    if (!name || !category) return;
 
-  function handleAddClick() {
-    if (!currentUser) {
-      pendingIntent = 'add';
-      openDrawer('auth', 'login');
-    } else {
-      openDrawer('add');
+    const btn = el('rest-submit');
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+
+    try {
+      const created = await api('/restaurants', { method: 'POST', auth: true, body: { name, category, rating } });
+      showToast('Restaurante "' + created.name + '" cadastrado!');
+      closeDrawer();
+      await loadRestaurants();
+      openRestaurantMenu(created);
+    } catch (error) {
+      showToast(error.message || 'Erro ao cadastrar restaurante.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Cadastrar Restaurante';
     }
   }
 
-  el('add-btn').addEventListener('click', handleAddClick);
+  async function handleCreateDishWithOptionalPhoto(e) {
+    e.preventDefault();
+    const name = el('dish-name').value.trim();
+    const description = el('dish-desc').value.trim();
+    const price = parseFloat(el('dish-price').value);
+    const fileInput = el('new-dish-file');
+
+    el('f-dish-name').classList.toggle('has-error', !name);
+    el('f-dish-price').classList.toggle('has-error', isNaN(price) || price < 0);
+    if (!name || isNaN(price) || price < 0) return;
+
+    const btn = el('dish-submit');
+    btn.disabled = true;
+    btn.textContent = 'Cadastrando prato...';
+
+    try {
+      const createdDish = await api('/restaurants/' + activeRestaurant.id + '/dishes', {
+        method: 'POST',
+        auth: true,
+        body: { name, description, price }
+      });
+
+      if (fileInput.files && fileInput.files[0]) {
+        btn.textContent = 'Enviando foto do prato...';
+        const formData = new FormData();
+        formData.append('image', fileInput.files[0]);
+        await api('/dishes/' + createdDish.id + '/image', {
+          method: 'POST',
+          auth: true,
+          formData
+        });
+        showToast('Prato "' + name + '" cadastrado com foto otimizada!');
+      } else {
+        showToast('Prato "' + name + '" cadastrado com sucesso!');
+      }
+
+      closeDrawer();
+      await loadDishesForActiveRestaurant();
+    } catch (error) {
+      showToast(error.message || 'Erro ao cadastrar prato.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Cadastrar Prato no Cardápio';
+    }
+  }
+
+  async function handleSingleDishPhotoUpload(e) {
+    e.preventDefault();
+    const input = el('dish-photo-input');
+    if (!input.files || !input.files[0]) {
+      showToast('Selecione uma imagem JPEG, PNG ou WebP.', 'error');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', input.files[0]);
+
+    const btn = el('dish-photo-submit');
+    btn.disabled = true;
+    btn.textContent = 'Otimizando e salvando...';
+
+    try {
+      const updated = await api('/dishes/' + activeDishForPhoto.id + '/image', {
+        method: 'POST',
+        auth: true,
+        formData
+      });
+      activeDishForPhoto = updated;
+      showToast('Foto do prato atualizada com sucesso!');
+      closeDrawer();
+      await loadDishesForActiveRestaurant();
+    } catch (error) {
+      showToast(error.message || 'Erro ao enviar foto do prato.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Enviar Foto (POST /dishes/' + activeDishForPhoto.id + '/image)';
+    }
+  }
 
   function showToast(message, type) {
+    const stack = el('toast-stack');
     const toast = document.createElement('div');
     toast.className = 'toast' + (type === 'error' ? ' error' : '');
     toast.textContent = message;
-    toastStack.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
+    stack.appendChild(toast);
+    setTimeout(() => toast.remove(), 4200);
   }
 
-  // ---------- init ----------
-  renderAuthArea();
+  // ---------- INICIALIZAÇÃO ----------
+  renderAuthSlot();
   loadRestaurants();
 </script>
 </body>
