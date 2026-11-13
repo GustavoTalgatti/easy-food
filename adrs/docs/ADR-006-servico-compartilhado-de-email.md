@@ -27,7 +27,9 @@ cadastro quando o e-mail falha.
 ## Decisão
 Criar o `email.service.js` em `shared`, expondo uma única função genérica,
 `sendEmail({ to, toName, subject, header, body, footer })`. O restante da aplicação só conhece
-essa função; tudo que é específico do provedor (MailerSend) fica isolado dentro do serviço.
+essa função; tudo que é específico do provedor fica isolado dentro do serviço. Hoje o serviço
+suporta dois provedores, escolhidos automaticamente pelo formato da chave `EMAIL_API_KEY`:
+chaves iniciadas em `re_` usam a API HTTP do Resend e as demais usam o MailerSend.
 O envio é tratado como ação secundária: o Service grava primeiro o dado principal e envia o
 e-mail depois, dentro de um `try/catch`. Se o envio falhar, o erro é registrado no log e a
 operação principal continua válida.
@@ -38,6 +40,7 @@ operação principal continua válida.
 - Trocar de provedor exige alterar apenas um arquivo, sem tocar nos módulos que enviam e-mails.
 - O objetivo do usuário (cadastrar o restaurante) já foi cumprido quando o e-mail é enviado; derrubar o cadastro por causa de um serviço externo prejudicaria a disponibilidade da API.
 - A chave da API e o remetente ficam no `.env`, fora do código e do repositório.
+- O MailerSend exige remetente de domínio verificado, enquanto o Resend permite testes com `onboarding@resend.dev`, sem domínio próprio. Suportar os dois facilitou o desenvolvimento acadêmico, e nenhum Service precisou mudar, porque todos só conhecem `sendEmail()`.
 
 ## Consequências
 
@@ -52,6 +55,8 @@ operação principal continua válida.
 - O envio é aguardado dentro da requisição, então um provedor lento aumenta o tempo de resposta do cadastro.
 - Não há reenvio automático: um e-mail que falhou não é tentado novamente.
 - Conteúdo vindo do usuário colocado no HTML do e-mail precisa ser escapado pelo chamador (`escapeHtml`).
+- Escolher o provedor pelo prefixo da chave é uma heurística simples: não é uma configuração explícita e depende de o provedor manter esse formato de chave.
+- A chamada HTTP ao Resend tem limite de 10 segundos; ao estourar, o envio é tratado como falha (registrada no log) e o cadastro é preservado.
 
 ## Critérios de revisão
 Esta decisão deverá ser reavaliada quando:
@@ -59,8 +64,10 @@ Esta decisão deverá ser reavaliada quando:
 2. For necessário garantir a entrega (reenvio, fila, registro de e-mails não enviados).
 3. O projeto precisar trocar de provedor ou usar mais de um.
 4. Algum e-mail passar a ser parte essencial da operação (ex: confirmação obrigatória de conta), deixando de ser ação secundária.
+5. For necessário tornar a escolha do provedor explícita (por exemplo, uma variável `EMAIL_PROVIDER`) ou manter apenas um provedor.
 
 ## Notas
 No plano de testes do MailerSend o envio costuma ser limitado a destinatários e domínios
-verificados na própria conta. O destinatário dos e-mails de teste fica em `EMAIL_TEST_TO`, no
+verificados na própria conta. No Resend, o remetente de teste `onboarding@resend.dev` costuma
+permitir envio apenas para o e-mail do dono da conta. O destinatário dos e-mails de teste fica em `EMAIL_TEST_TO`, no
 `.env`.

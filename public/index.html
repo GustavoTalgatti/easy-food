@@ -687,6 +687,13 @@
       if (!response.ok) {
         const err = new Error((data && data.error) || ('Erro HTTP ' + status));
         err.status = status;
+        if (status === 401 && auth) {
+          // Token ausente, inválido ou expirado: encerra a sessão local
+          authToken = null;
+          currentUser = null;
+          renderAuthSlot();
+          err.message = 'Sessão expirada. Faça login novamente.';
+        }
         throw err;
       }
       return data;
@@ -1053,8 +1060,15 @@
     el('drawer').classList.remove('open');
   }
 
-  el('overlay').addEventListener('click', closeDrawer);
-  el('drawer-close').addEventListener('click', closeDrawer);
+  // Ao fechar o drawer manualmente, a ação que esperava o login é descartada.
+  // Assim ela não dispara sozinha em um login feito mais tarde.
+  function dismissDrawer() {
+    pendingIntent = null;
+    closeDrawer();
+  }
+
+  el('overlay').addEventListener('click', dismissDrawer);
+  el('drawer-close').addEventListener('click', dismissDrawer);
 
   function renderDrawerContent() {
     const title = el('drawer-title');
@@ -1338,7 +1352,14 @@
       currentUser = loginData.user;
       renderAuthSlot();
       showToast('Conta criada e autenticada com sucesso!');
-      openDrawer('profile');
+
+      if (typeof pendingIntent === 'function') {
+        const fn = pendingIntent;
+        pendingIntent = null;
+        fn();
+      } else {
+        openDrawer('profile');
+      }
     } catch (error) {
       showToast(error.message || 'Erro ao criar conta.', 'error');
     } finally {
@@ -1430,15 +1451,27 @@
     btn.disabled = true;
     btn.textContent = 'Cadastrando prato...';
 
+    // 1. Operação principal: criar o prato
+    let createdDish;
     try {
-      const createdDish = await api('/restaurants/' + activeRestaurant.id + '/dishes', {
+      createdDish = await api('/restaurants/' + activeRestaurant.id + '/dishes', {
         method: 'POST',
         auth: true,
         body: { name, description, price }
       });
+    } catch (error) {
+      showToast(error.message || 'Erro ao cadastrar prato.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Cadastrar Prato no Cardápio';
+      return;
+    }
 
-      if (fileInput.files && fileInput.files[0]) {
-        btn.textContent = 'Enviando foto do prato...';
+    // 2. Ação secundária: enviar a foto. Se falhar, o prato JÁ existe,
+    // então não mantemos o formulário aberto (reenviar duplicaria o prato).
+    let photoError = null;
+    if (fileInput.files && fileInput.files[0]) {
+      btn.textContent = 'Enviando foto do prato...';
+      try {
         const formData = new FormData();
         formData.append('image', fileInput.files[0]);
         await api('/dishes/' + createdDish.id + '/image', {
@@ -1446,19 +1479,21 @@
           auth: true,
           formData
         });
-        showToast('Prato "' + name + '" cadastrado com foto otimizada!');
-      } else {
-        showToast('Prato "' + name + '" cadastrado com sucesso!');
+      } catch (error) {
+        photoError = error;
       }
-
-      closeDrawer();
-      await loadDishesForActiveRestaurant();
-    } catch (error) {
-      showToast(error.message || 'Erro ao cadastrar prato.', 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Cadastrar Prato no Cardápio';
     }
+
+    if (photoError) {
+      showToast('Prato "' + name + '" cadastrado, mas a foto não foi enviada: ' + photoError.message + '. Use o botão Enviar Foto no card do prato para tentar de novo.', 'error');
+    } else if (fileInput.files && fileInput.files[0]) {
+      showToast('Prato "' + name + '" cadastrado com foto otimizada!');
+    } else {
+      showToast('Prato "' + name + '" cadastrado com sucesso!');
+    }
+
+    closeDrawer();
+    await loadDishesForActiveRestaurant();
   }
 
   async function handleSingleDishPhotoUpload(e) {

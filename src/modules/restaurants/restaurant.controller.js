@@ -12,7 +12,7 @@ async function list(req, res) {
 }
 
 async function create(req, res) {
-  const { name, category, rating } = req.body;
+  const { name, category, rating } = req.body || {};
 
   if (!name || !category) {
     return res.status(400).json({

@@ -102,7 +102,11 @@ async function deliver({ to, toName, subject, html, text }) {
         subject,
         html,
         text
-      })
+      }),
+      // O envio é aguardado dentro da requisição: sem limite de tempo, um
+      // provedor lento travaria o cadastro. Ao estourar, o erro é tratado como
+      // qualquer outra falha de e-mail (registrada no log, cadastro preservado).
+      signal: AbortSignal.timeout(10000)
     });
 
     if (!response.ok) {
